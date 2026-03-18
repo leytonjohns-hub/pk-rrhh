@@ -1235,10 +1235,18 @@ function verFicha(ref) {
       </div>
     </div>` : `<div style="margin-top:.75rem;font-size:.8rem;color:var(--pk-muted);padding:8px;background:rgba(217,83,79,.06);border-left:2px solid var(--pk-red)">⚠ Datos de contrato y EPP aún no completados — use el botón "Datos Contrato / EPP"</div>`}
     ${t.carpeta ? `<div style="margin-top:1rem">
-      <a href="${t.carpeta}" target="_blank" class="btn btn-secondary" style="text-decoration:none">📁 Abrir Carpeta Drive</a>
+      <button onclick="abrirCarpetaDrive()" class="btn btn-secondary">📁 Abrir Carpeta Drive</button>
     </div>` : ''}
   `;
+  // Guardar URL carpeta para el botón
+  window._carpetaActual = t.carpeta || '';
   openModal('modal-ficha');
+}
+
+function abrirCarpetaDrive() {
+  if (window._carpetaActual) {
+    window.location.href = window._carpetaActual;
+  }
 }
 
 function fi(label, val) {
