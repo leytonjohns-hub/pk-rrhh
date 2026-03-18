@@ -1245,7 +1245,13 @@ function verFicha(ref) {
 
 function abrirCarpetaDrive() {
   if (window._carpetaActual) {
-    window.location.href = window._carpetaActual;
+    const a = document.createElement('a');
+    a.href = window._carpetaActual;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
   }
 }
 
