@@ -2073,11 +2073,10 @@ async function submitForm() {
   };
 
   try {
-    // Enviar al Apps Script
+    // Enviar al Apps Script (sin headers para evitar CORS preflight)
     await fetch(GAS_URL, {
       method: 'POST',
       body: JSON.stringify(formData),
-      headers: { 'Content-Type': 'application/json' }
     });
 
     clearInterval(interval);
