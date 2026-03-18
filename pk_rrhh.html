@@ -1040,7 +1040,7 @@
 // ══════════════════════════════════════════════
 // CONFIG
 // ══════════════════════════════════════════════
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbwRUaaeH4itMup4oLzroamtVP6Syi_veTIqmSdSg05iBuB7U6i9U9ReNJXFIiygbrxL/exec';
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbzr1LbD5OeV0lEn8jxafJUb1jjSxWyVL9pHMiJDA6NxoybaWLkloG_rxOKLrUBKOpyn/exec';
 
 let allTrabajadores = [];
 let trabajadorActual = null;
@@ -1235,7 +1235,7 @@ function verFicha(ref) {
       </div>
     </div>` : `<div style="margin-top:.75rem;font-size:.8rem;color:var(--pk-muted);padding:8px;background:rgba(217,83,79,.06);border-left:2px solid var(--pk-red)">⚠ Datos de contrato y EPP aún no completados — use el botón "Datos Contrato / EPP"</div>`}
     ${t.carpeta ? `<div style="margin-top:1rem">
-      <a href="${t.carpeta}" target="_blank" class="btn btn-secondary" style="text-decoration:none">📁 Abrir Carpeta Drive</a>
+      <button onclick="window.open(currentWorker.carpeta, '_blank')" class="btn btn-secondary">📁 Abrir Carpeta Drive</button>
     </div>` : ''}
   `;
   openModal('modal-ficha');
@@ -1319,7 +1319,7 @@ async function guardarContrato() {
   };
 
   try {
-    if (GAS_URL !== 'https://script.google.com/macros/s/AKfycbwRUaaeH4itMup4oLzroamtVP6Syi_veTIqmSdSg05iBuB7U6i9U9ReNJXFIiygbrxL/exec') {
+    if (GAS_URL !== 'https://script.google.com/macros/s/AKfycbzr1LbD5OeV0lEn8jxafJUb1jjSxWyVL9pHMiJDA6NxoybaWLkloG_rxOKLrUBKOpyn/exec') {
       await fetch(GAS_URL, {
         method: 'POST', body: JSON.stringify(payload),
         headers: { 'Content-Type': 'application/json' }
@@ -1643,7 +1643,7 @@ function fichaCompletaHTML(t) {
           <div style="font-size:.82rem;color:var(--pk-muted)">${t.rut} · ${(t.os10_cat||'—').split('—')[0]}</div>
         </div>
         <div style="margin-left:auto">${estadoBadge(t.estado)}</div>
-        ${t.carpeta ? `<a href="${t.carpeta}" target="_blank" class="action-btn" style="text-decoration:none">📁 Drive</a>` : ''}
+        ${t.carpeta ? `<button onclick="window.open(t.carpeta, '_blank')" class="action-btn">📁 Drive</button>` : ''}
         <button class="action-btn" onclick="openModalEstadoDirecto('${t.ref}')">Actualizar Estado</button>
         <button class="action-btn" onclick="trabajadorActual=allTrabajadores.find(x=>x.ref==='${t.ref}');openModalContrato()">Contrato/EPP</button>
       </div>
