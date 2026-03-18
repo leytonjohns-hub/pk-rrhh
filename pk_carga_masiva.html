@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PK SpA — Carga Masiva</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js">
+function irAPantallaPrincipal() {
+  const user = JSON.parse(sessionStorage.getItem('pk_user') || 'null');
+  if (!user) { window.location.href = 'pk_login.html'; return; }
+  const PERFILES = {
+    'RRHH':                  'pk_rrhh.html',
+    'Prevención de Riesgos': 'pk_prevencion.html',
+    'Gerencia Operaciones':  'pk_gerencia.html',
+    'Gerencia General':      'pk_gerencia.html',
+    'Supervisor':            'pk_supervisor.html',
+  };
+  window.location.href = PERFILES[user.perfil] || 'pk_login.html';
+}
+
+</script>
+<style>
+  :root {
+    --pk-black:#0a0c0f;--pk-panel:#161b22;--pk-panel2:#1c2128;
+    --pk-border:#21262d;--pk-border-light:#30363d;
+    --pk-gold:#c9a84c;--pk-gold-dim:#8a6f30;--pk-gold-glow:rgba(201,168,76,0.15);
+    --pk-red:#d9534f;--pk-green:#3fb950;--pk-blue:#58a6ff;--pk-orange:#f0883e;
+    --pk-text:#e6edf3;--pk-muted:#7d8590;--pk-input-bg:#0d1117;
+    --font-head:'Rajdhani',sans-serif;--font-body:'Source Sans 3',sans-serif;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--pk-black);color:var(--pk-text);font-family:var(--font-body);font-size:14px;min-height:100vh;}
+
+  .site-header{background:rgba(10,12,15,.97);border-bottom:1px solid var(--pk-border);padding:0 2rem;height:56px;display:flex;align-items:center;gap:1rem;position:sticky;top:0;z-index:100;}
+  .logo-hex{width:34px;height:34px;background:var(--pk-gold);clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .logo-hex span{font-family:var(--font-head);font-weight:700;font-size:12px;color:var(--pk-black);}
+  .site-title{font-family:var(--font-head);font-size:1.1rem;font-weight:600;letter-spacing:.08em;}
+  .site-title span{color:var(--pk-gold);}
+  .header-back{margin-left:auto;font-family:var(--font-head);font-size:.75rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--pk-muted);border:1px solid var(--pk-border-light);padding:6px 14px;cursor:pointer;text-decoration:none;transition:all .2s;}
+  .header-back:hover{border-color:var(--pk-gold);color:var(--pk-gold);}
+
+  .content{max-width:1100px;margin:2rem auto;padding:0 2rem 4rem;}
+
+  /* TABS */
+  .tabs{display:flex;border-bottom:1px solid var(--pk-border);margin-bottom:2rem;gap:0;}
+  .tab{font-family:var(--font-head);font-size:.88rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:12px 24px;cursor:pointer;color:var(--pk-muted);border-bottom:3px solid transparent;transition:all .2s;}
+  .tab:hover{color:var(--pk-text);}
+  .tab.active{color:var(--pk-gold);border-bottom-color:var(--pk-gold);}
+
+  .tab-panel{display:none;}
+  .tab-panel.active{display:block;}
+
+  /* CARDS */
+  .card{background:var(--pk-panel);border:1px solid var(--pk-border);margin-bottom:1.5rem;}
+  .card-header{padding:1.25rem 1.5rem;border-bottom:1px solid var(--pk-border);display:flex;align-items:center;gap:1rem;background:linear-gradient(90deg,var(--pk-gold-glow),transparent);}
+  .card-title{font-family:var(--font-head);font-size:1rem;font-weight:600;letter-spacing:.06em;color:var(--pk-gold);}
+  .card-body{padding:1.5rem;}
+
+  /* DOWNLOAD SECTION */
+  .download-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.5rem;}
+  .download-item{background:var(--pk-panel2);border:1px solid var(--pk-border);padding:1.25rem;display:flex;flex-direction:column;gap:.75rem;transition:border-color .2s;}
+  .download-item:hover{border-color:var(--pk-gold-dim);}
+  .di-icon{font-size:2rem;}
+  .di-title{font-family:var(--font-head);font-size:.95rem;font-weight:600;color:var(--pk-text);}
+  .di-desc{font-size:.8rem;color:var(--pk-muted);line-height:1.5;}
+
+  /* UPLOAD ZONE */
+  .upload-zone{border:2px dashed var(--pk-border-light);background:var(--pk-input-bg);padding:2.5rem;text-align:center;cursor:pointer;transition:all .2s;position:relative;}
+  .upload-zone:hover,.upload-zone.drag{border-color:var(--pk-gold);background:var(--pk-gold-glow);}
+  .upload-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+  .uz-icon{font-size:2.5rem;margin-bottom:.75rem;}
+  .uz-title{font-family:var(--font-head);font-size:1rem;font-weight:600;color:var(--pk-gold);letter-spacing:.1em;text-transform:uppercase;}
+  .uz-hint{font-size:.8rem;color:var(--pk-muted);margin-top:6px;}
+
+  /* PROGRESS */
+  .progress-wrap{margin:1.5rem 0;display:none;}
+  .progress-wrap.show{display:block;}
+  .progress-label{display:flex;justify-content:space-between;font-size:.8rem;color:var(--pk-muted);margin-bottom:6px;}
+  .progress-track{background:var(--pk-border);height:8px;}
+  .progress-fill{height:100%;background:var(--pk-gold);transition:width .3s ease;}
+
+  /* RESULTADOS TABLE */
+  .result-header{display:flex;align-items:center;gap:1rem;margin-bottom:1rem;flex-wrap:wrap;}
+  .stat-pill{padding:5px 14px;font-family:var(--font-head);font-size:.78rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;border:1px solid;}
+  .stat-pill.total{color:var(--pk-blue);border-color:var(--pk-blue);background:rgba(88,166,255,.08);}
+  .stat-pill.ok{color:var(--pk-green);border-color:var(--pk-green);background:rgba(63,185,80,.08);}
+  .stat-pill.warn{color:var(--pk-orange);border-color:var(--pk-orange);background:rgba(240,136,62,.08);}
+  .stat-pill.error{color:var(--pk-red);border-color:var(--pk-red);background:rgba(217,83,79,.08);}
+
+  .table-wrap{overflow-x:auto;max-height:400px;overflow-y:auto;}
+  table{width:100%;border-collapse:collapse;font-size:.82rem;}
+  thead{position:sticky;top:0;z-index:5;}
+  thead tr{background:var(--pk-panel2);}
+  th{padding:8px 10px;text-align:left;font-family:var(--font-head);font-size:.7rem;font-weight:600;letter-spacing:.1em;color:var(--pk-muted);text-transform:uppercase;border-bottom:1px solid var(--pk-border);white-space:nowrap;}
+  td{padding:8px 10px;border-bottom:1px solid var(--pk-border);vertical-align:middle;}
+  tr:hover td{background:var(--pk-gold-glow);}
+
+  .row-status{font-family:var(--font-head);font-size:.65rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;border:1px solid;}
+  .row-status.ok{color:var(--pk-green);border-color:var(--pk-green);background:rgba(63,185,80,.08);}
+  .row-status.error{color:var(--pk-red);border-color:var(--pk-red);background:rgba(217,83,79,.08);}
+  .row-status.warn{color:var(--pk-orange);border-color:var(--pk-orange);background:rgba(240,136,62,.08);}
+  .row-status.dup{color:var(--pk-blue);border-color:var(--pk-blue);background:rgba(88,166,255,.08);}
+
+  .error-list{font-size:.75rem;color:var(--pk-red);margin-top:2px;}
+
+  /* BTNS */
+  .btn{font-family:var(--font-head);font-size:.82rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:10px 22px;border:none;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:8px;}
+  .btn-gold{background:var(--pk-gold);color:var(--pk-black);}
+  .btn-gold:hover{background:#e0b85a;}
+  .btn-gold:disabled{opacity:.4;cursor:not-allowed;}
+  .btn-secondary{background:transparent;border:1px solid var(--pk-border-light);color:var(--pk-muted);}
+  .btn-secondary:hover{border-color:var(--pk-gold);color:var(--pk-gold);}
+  .btn-green{background:var(--pk-green);color:var(--pk-black);}
+  .btn-green:hover{background:#52d467;}
+  .btn-green:disabled{opacity:.4;cursor:not-allowed;}
+  .btn-red{background:transparent;border:1px solid var(--pk-red);color:var(--pk-red);}
+  .btn-red:hover{background:rgba(217,83,79,.1);}
+
+  /* FORM */
+  .form-row{margin-bottom:1rem;}
+  .form-row label{display:block;font-family:var(--font-head);font-size:.72rem;font-weight:600;letter-spacing:.12em;color:var(--pk-muted);text-transform:uppercase;margin-bottom:6px;}
+  .form-row select,.form-row input{width:100%;background:var(--pk-input-bg);border:1px solid var(--pk-border-light);color:var(--pk-text);font-family:var(--font-body);font-size:.88rem;padding:9px 12px;outline:none;transition:border-color .2s;}
+  .form-row select:focus,.form-row input:focus{border-color:var(--pk-gold);}
+  .form-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+  .form-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;}
+
+  /* INFO BANNER */
+  .info-banner{background:var(--pk-gold-glow);border:1px solid var(--pk-border);border-left:3px solid var(--pk-gold);padding:1rem 1.25rem;font-size:.85rem;color:var(--pk-muted);line-height:1.6;margin-bottom:1.5rem;}
+  .info-banner strong{color:var(--pk-gold);}
+
+  /* LOG */
+  .log-box{background:var(--pk-input-bg);border:1px solid var(--pk-border);padding:1rem;font-family:monospace;font-size:.78rem;max-height:200px;overflow-y:auto;line-height:1.8;}
+  .log-ok{color:var(--pk-green);}
+  .log-err{color:var(--pk-red);}
+  .log-warn{color:var(--pk-orange);}
+  .log-info{color:var(--pk-blue);}
+
+  /* FILE DROP LIST */
+  .file-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;}
+  .file-chip{background:var(--pk-panel2);border:1px solid var(--pk-border-light);padding:4px 10px;font-size:.75rem;display:flex;align-items:center;gap:6px;}
+  .file-chip .fc-name{color:var(--pk-text);}
+  .file-chip .fc-size{color:var(--pk-muted);}
+  .file-chip .fc-remove{color:var(--pk-red);cursor:pointer;font-size:.9rem;line-height:1;}
+
+  /* FOLDER CHIPS */
+  .folder-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:1rem;}
+  .folder-chip{padding:5px 12px;border:1px solid var(--pk-border-light);font-size:.75rem;cursor:pointer;transition:all .15s;color:var(--pk-muted);font-family:var(--font-head);font-weight:600;letter-spacing:.06em;}
+  .folder-chip:hover,.folder-chip.selected{border-color:var(--pk-gold);color:var(--pk-gold);background:var(--pk-gold-glow);}
+
+  /* TOAST */
+  .toast{position:fixed;bottom:2rem;right:2rem;background:var(--pk-panel);border:1px solid var(--pk-border);border-left:3px solid var(--pk-green);padding:12px 20px;font-size:.88rem;color:var(--pk-green);z-index:999;display:none;}
+  .toast.show{display:block;animation:toastIn .3s ease both;}
+  .toast.error{border-left-color:var(--pk-red);color:var(--pk-red);}
+  @keyframes toastIn{from{opacity:0;transform:translateX(20px);}to{opacity:1;transform:translateX(0);}}
+
+  /* MODAL */
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:200;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
+  .modal-overlay.show{display:flex;}
+  .modal{background:var(--pk-panel);border:1px solid var(--pk-border);width:90%;max-width:520px;padding:2rem;text-align:center;}
+  .modal-spinner{width:48px;height:48px;border:3px solid var(--pk-border-light);border-top-color:var(--pk-gold);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 1rem;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .modal-title{font-family:var(--font-head);font-size:1.1rem;font-weight:600;color:var(--pk-gold);margin-bottom:.5rem;}
+  .modal-sub{font-size:.85rem;color:var(--pk-muted);}
+  .modal-progress{font-family:var(--font-head);font-size:1.5rem;font-weight:700;color:var(--pk-text);margin-top:.75rem;}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="logo-hex"><span>PK</span></div>
+  <div class="site-title"><span>PK</span> SpA — Carga Masiva</div>
+  <a class="header-back" href="#" onclick="irAPantallaPrincipal()" style="margin-right:8px;border-color:var(--pk-gold);color:var(--pk-gold)">🏠 Inicio</a>
+  <a class="header-back" href="pk_rrhh.html">← Volver al Panel</a>
+</header>
+
+<div class="content">
+
+  <div class="tabs">
+    <div class="tab active" onclick="showTab('trabajadores')">📋 Trabajadores (Excel)</div>
+    <div class="tab" onclick="showTab('documentos')">📁 Documentos (PDFs)</div>
+    <div class="tab" onclick="showTab('historial')">📊 Historial de Cargas</div>
+  </div>
+
+  <!-- ══ TAB: CARGA DE TRABAJADORES ══ -->
+  <div class="tab-panel active" id="tab-trabajadores">
+
+    <div class="card">
+      <div class="card-header">
+        <span style="font-size:1.2rem">⬇</span>
+        <div class="card-title">Paso 1 — Descargar Plantilla</div>
+      </div>
+      <div class="card-body">
+        <div class="download-grid">
+          <div class="download-item">
+            <div class="di-icon">📊</div>
+            <div class="di-title">Plantilla Excel Completa</div>
+            <div class="di-desc">Todas las columnas del sistema con validaciones, listas desplegables e instrucciones. Para carga inicial de los 140 trabajadores.</div>
+            <button class="btn btn-gold" onclick="descargarPlantilla()">⬇ Descargar Plantilla</button>
+          </div>
+          <div class="download-item">
+            <div class="di-icon">📋</div>
+            <div class="di-title">Solo Campos Obligatorios</div>
+            <div class="di-desc">Versión simplificada con únicamente los 20 campos requeridos para el ingreso mínimo al sistema. Más rápido de completar.</div>
+            <button class="btn btn-secondary" onclick="descargarPlantillaMinima()">⬇ Plantilla Mínima</button>
+          </div>
+          <div class="download-item">
+            <div class="di-icon">📄</div>
+            <div class="di-title">Exportar Trabajadores Actuales</div>
+            <div class="di-desc">Exporta los trabajadores ya cargados en el sistema a formato Excel para revisión o respaldo.</div>
+            <button class="btn btn-secondary" onclick="exportarActuales()">⬇ Exportar Actuales</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span style="font-size:1.2rem">⬆</span>
+        <div class="card-title">Paso 2 — Subir Excel con Datos</div>
+      </div>
+      <div class="card-body">
+        <div class="info-banner">
+          <strong>Antes de subir:</strong> Use la plantilla descargada. Elimine la fila de ejemplo (fila 5).
+          El sistema validará cada fila y mostrará errores antes de confirmar la carga.
+          Los trabajadores con RUT duplicado no se cargarán dos veces.
+        </div>
+
+        <div class="upload-zone" id="uz-excel"
+             ondragover="e=>{e.preventDefault();this.classList.add('drag')}"
+             ondragleave="e=>{this.classList.remove('drag')}"
+             ondrop="handleExcelDrop(event)">
+          <input type="file" id="input-excel" accept=".xlsx,.xls,.csv"
+                 onchange="procesarExcel(this.files[0])">
+          <div class="uz-icon">📊</div>
+          <div class="uz-title">Arrastrar Excel aquí o hacer clic</div>
+          <div class="uz-hint">Formatos: .xlsx, .xls, .csv — Máx. 10 MB — Hasta 500 trabajadores</div>
+        </div>
+
+        <div id="excel-preview" style="margin-top:1.5rem;display:none;">
+          <div class="result-header">
+            <span style="font-family:var(--font-head);font-size:.85rem;color:var(--pk-muted);">Vista previa:</span>
+            <span class="stat-pill total" id="stat-total">0 filas</span>
+            <span class="stat-pill ok" id="stat-ok">0 válidas</span>
+            <span class="stat-pill error" id="stat-err">0 errores</span>
+            <span class="stat-pill warn" id="stat-dup">0 duplicados</span>
+            <button class="btn btn-secondary" onclick="limpiarExcel()" style="margin-left:auto">✕ Limpiar</button>
+          </div>
+
+          <div class="progress-wrap" id="prog-validacion">
+            <div class="progress-label"><span>Validando datos...</span><span id="prog-pct">0%</span></div>
+            <div class="progress-track"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+          </div>
+
+          <div class="table-wrap" style="margin-bottom:1rem;">
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th><th>RUT</th><th>Nombre</th><th>OS-10 Cat.</th>
+                  <th>AFP</th><th>Salud</th><th>Estado</th><th>Errores</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-preview"></tbody>
+            </table>
+          </div>
+
+          <div style="display:flex;gap:1rem;align-items:center;margin-top:1rem;">
+            <button class="btn btn-green" id="btn-confirmar" onclick="confirmarCarga()" disabled>
+              ✓ Confirmar Carga de Trabajadores Válidos
+            </button>
+            <button class="btn btn-red" onclick="exportarErrores()">⬇ Exportar Filas con Errores</button>
+          </div>
+        </div>
+
+        <div class="progress-wrap" id="prog-carga" style="margin-top:1.5rem;">
+          <div class="progress-label">
+            <span id="prog-carga-label">Cargando trabajadores...</span>
+            <span id="prog-carga-pct">0%</span>
+          </div>
+          <div class="progress-track"><div class="progress-fill" id="prog-carga-fill" style="width:0%;background:var(--pk-green)"></div></div>
+        </div>
+
+        <div class="log-box" id="log-carga" style="margin-top:1rem;display:none;"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ══ TAB: CARGA DE DOCUMENTOS ══ -->
+  <div class="tab-panel" id="tab-documentos">
+
+    <div class="card">
+      <div class="card-header">
+        <span style="font-size:1.2rem">⚙</span>
+        <div class="card-title">Configurar Carga de Documentos</div>
+      </div>
+      <div class="card-body">
+        <div class="info-banner">
+          <strong>Convención de nombres:</strong> Para asociar automáticamente los PDFs al trabajador correcto,
+          el nombre del archivo debe comenzar con el <strong>RUT sin puntos</strong>
+          (ej: <code style="color:var(--pk-gold)">12345678-9_liquidacion_marzo2025.pdf</code>).
+          Si los archivos están en subcarpetas por trabajador, el sistema leerá el nombre de la carpeta para obtener el RUT.
+        </div>
+
+        <div class="form-grid-2" style="margin-bottom:1.5rem;">
+          <div class="form-row">
+            <label>Tipo de Documento *</label>
+            <select id="doc-tipo-masivo">
+              <option value="">— Seleccione tipo —</option>
+              <option value="03 — Remuneraciones">Liquidaciones de Sueldo</option>
+              <option value="02 — Contratos">Contratos de Trabajo</option>
+              <option value="05 — Cursos y Certificados">Certificados de Cursos</option>
+              <option value="07 — Exámenes">Exámenes Médicos / Psicológicos</option>
+              <option value="01 — Documentos de Ingreso">Documentos de Ingreso</option>
+              <option value="04 — Licencias Médicas">Licencias Médicas</option>
+              <option value="06 — Amonestaciones">Amonestaciones</option>
+              <option value="08 — Otros">Otros Documentos</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <label>Período (si aplica)</label>
+            <input type="text" id="doc-periodo" placeholder="Ej: Marzo 2025, 2024, etc.">
+          </div>
+        </div>
+
+        <div class="form-row" style="margin-bottom:1.5rem;">
+          <label>Subcarpeta de destino en Drive</label>
+          <div class="folder-chips" id="folder-chips-masivo">
+            <div class="folder-chip selected" onclick="selFolder(this,'03 — Remuneraciones')">💰 Remuneraciones</div>
+            <div class="folder-chip" onclick="selFolder(this,'02 — Contratos')">📝 Contratos</div>
+            <div class="folder-chip" onclick="selFolder(this,'05 — Cursos y Certificados')">🎓 Cursos</div>
+            <div class="folder-chip" onclick="selFolder(this,'07 — Exámenes')">🩺 Exámenes</div>
+            <div class="folder-chip" onclick="selFolder(this,'01 — Documentos de Ingreso')">📄 Ingreso</div>
+            <div class="folder-chip" onclick="selFolder(this,'04 — Licencias Médicas')">🏥 Licencias</div>
+            <div class="folder-chip" onclick="selFolder(this,'06 — Amonestaciones')">⚠ Amonestaciones</div>
+            <div class="folder-chip" onclick="selFolder(this,'08 — Otros')">📦 Otros</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span style="font-size:1.2rem">⬆</span>
+        <div class="card-title">Subir Documentos PDF</div>
+      </div>
+      <div class="card-body">
+
+        <div class="upload-zone" id="uz-docs"
+             ondragover="e=>{e.preventDefault();document.getElementById('uz-docs').classList.add('drag')}"
+             ondragleave="e=>{document.getElementById('uz-docs').classList.remove('drag')}"
+             ondrop="handleDocsDrop(event)">
+          <input type="file" id="input-docs" accept=".pdf,.jpg,.jpeg,.png"
+                 multiple onchange="procesarDocs(this.files)">
+          <div class="uz-icon">📁</div>
+          <div class="uz-title">Arrastrar PDFs aquí o hacer clic</div>
+          <div class="uz-hint">
+            Múltiples archivos — PDF, JPG, PNG — Máx. 5 MB c/u<br>
+            Nombrar archivos: RUT_tipodocumento.pdf (ej: 12345678-9_liquidacion_marzo.pdf)
+          </div>
+        </div>
+
+        <div id="docs-preview" style="margin-top:1.5rem;display:none;">
+          <div class="result-header">
+            <span style="font-family:var(--font-head);font-size:.85rem;color:var(--pk-muted)">Archivos seleccionados:</span>
+            <span class="stat-pill total" id="doc-stat-total">0 archivos</span>
+            <span class="stat-pill ok" id="doc-stat-ok">0 asociados</span>
+            <span class="stat-pill error" id="doc-stat-err">0 sin RUT</span>
+            <button class="btn btn-secondary" onclick="limpiarDocs()" style="margin-left:auto">✕ Limpiar</button>
+          </div>
+
+          <div class="table-wrap" style="margin-bottom:1rem;">
+            <table>
+              <thead>
+                <tr><th>#</th><th>Archivo</th><th>Tamaño</th><th>RUT detectado</th><th>Trabajador</th><th>Subcarpeta</th><th>Estado</th></tr>
+              </thead>
+              <tbody id="tbody-docs"></tbody>
+            </table>
+          </div>
+
+          <div class="progress-wrap show" id="prog-docs">
+            <div class="progress-label">
+              <span id="prog-docs-label">Listo para subir</span>
+              <span id="prog-docs-pct">0%</span>
+            </div>
+            <div class="progress-track"><div class="progress-fill" id="prog-docs-fill" style="width:0%;background:var(--pk-blue)"></div></div>
+          </div>
+
+          <div style="display:flex;gap:1rem;margin-top:1rem;">
+            <button class="btn btn-green" id="btn-subir-docs" onclick="subirDocumentos()">
+              📤 Subir Documentos Asociados
+            </button>
+            <span style="font-size:.82rem;color:var(--pk-muted);align-self:center;" id="docs-sin-rut-warn"></span>
+          </div>
+        </div>
+
+        <div class="log-box" id="log-docs" style="margin-top:1rem;display:none;"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ══ TAB: HISTORIAL ══ -->
+  <div class="tab-panel" id="tab-historial">
+    <div class="card">
+      <div class="card-header">
+        <span style="font-size:1.2rem">📊</span>
+        <div class="card-title">Historial de Cargas Masivas</div>
+      </div>
+      <div class="card-body">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Fecha</th><th>Tipo</th><th>Usuario</th><th>Total</th><th>OK</th><th>Errores</th><th>Detalle</th></tr>
+            </thead>
+            <tbody id="tbody-historial">
+              <tr><td colspan="7" style="text-align:center;color:var(--pk-muted);padding:2rem;">Sin cargas registradas aún.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /content -->
+
+<!-- MODAL CARGANDO -->
+<div class="modal-overlay" id="modal-carga">
+  <div class="modal">
+    <div class="modal-spinner"></div>
+    <div class="modal-title" id="modal-titulo">Procesando Carga Masiva</div>
+    <div class="modal-sub" id="modal-sub">Validando datos...</div>
+    <div class="modal-progress" id="modal-progress">0 / 0</div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ════════════════════════════════════════════════════════
+// CONFIG
+// ════════════════════════════════════════════════════════
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbzr1LbD5OeV0lEn8jxafJUb1jjSxWyVL9pHMiJDA6NxoybaWLkloG_rxOKLrUBKOpyn/exec';
+const PLANTILLA_URL = 'PK_SpA_Plantilla_Carga_Masiva.xlsx';
+
+// Campos obligatorios y sus índices en el Excel (columna 0-based)
+const CAMPOS_OBLIG = {
+  'RUT': 0, 'Nombres': 1, 'Apellido Paterno': 2, 'Apellido Materno': 3,
+  'Fecha Nacimiento': 4, 'Género': 5, 'Estado Civil': 6, 'Nacionalidad': 7,
+  'Dirección': 8, 'Comuna': 9, 'Región': 10, 'Teléfono': 11,
+  'Emergencia Nombre': 12, 'Emergencia Relación': 13, 'Emergencia Teléfono': 14,
+  'OS-10 Número': 18, 'OS-10 Vencimiento': 19, 'OS-10 Categoría': 20,
+  'Email Trabajador': 22,
+  'AFP / Previsión': 23, 'Sistema Salud': 24, 'Mutual': 26,
+  'Antec. Comerciales': 28, 'Antec. Penales': 29,
+  'Examen Psicológico': 31, 'Examen Físico': 33,
+  'Banco': 36, 'Tipo Cuenta': 37, 'Número Cuenta': 38,
+  'Nivel Estudios': 40, 'Curso OS-10': 45,
+};
+
+let datosExcel  = [];
+let rutsCargados = new Set();
+let docsFiles   = [];
+let carpetaSeleccionada = '03 — Remuneraciones';
+let historialCargas = [];
+
+// ════════════════════════════════════════════════════════
+// TABS
+// ════════════════════════════════════════════════════════
+function showTab(id) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  document.querySelector(`[onclick="showTab('${id}')"]`).classList.add('active');
+  if (id === 'historial') renderHistorial();
+}
+
+// ════════════════════════════════════════════════════════
+// PLANTILLA
+// ════════════════════════════════════════════════════════
+function descargarPlantilla() {
+  const a = document.createElement('a');
+  a.href = PLANTILLA_URL;
+  a.download = 'PK_SpA_Plantilla_Carga_Masiva.xlsx';
+  a.click();
+  showToast('Descargando plantilla Excel...');
+}
+
+function descargarPlantillaMinima() {
+  showToast('Plantilla mínima: use las primeras 22 columnas de la plantilla completa.');
+}
+
+async function exportarActuales() {
+  showToast('Exportando trabajadores actuales...');
+  try {
+    const r = await fetch(`${GAS_URL}?action=getTrabajadores`);
+    const d = await r.json();
+    if (!d.trabajadores?.length) { showToast('No hay trabajadores cargados', true); return; }
+    // Crear CSV simple
+    const cols = ['RUT','Nombre','Estado','OS-10 Categoría','AFP','Salud','Fecha Ingreso'];
+    const rows = d.trabajadores.map(t => [t.rut, t.nombre, t.estado, t.os10_cat, t.afp, t.salud, t.fecha]);
+    const csv  = [cols, ...rows].map(r => r.map(v => `"${(v||'').replace(/"/g,'""')}"`).join(',')).join('\n');
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a'); a.href = url;
+    a.download = `PK_Trabajadores_${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+  } catch(e) {
+    showToast('Error al exportar (modo demo)', true);
+  }
+}
+
+// ════════════════════════════════════════════════════════
+// PROCESAR EXCEL
+// ════════════════════════════════════════════════════════
+function handleExcelDrop(e) {
+  e.preventDefault();
+  document.getElementById('uz-excel').classList.remove('drag');
+  const f = e.dataTransfer.files[0];
+  if (f) procesarExcel(f);
+}
+
+async function procesarExcel(file) {
+  if (!file) return;
+  if (file.size > 10 * 1024 * 1024) { showToast('Archivo demasiado grande (máx. 10 MB)', true); return; }
+
+  document.getElementById('prog-validacion').classList.add('show');
+  document.getElementById('prog-fill').style.width = '10%';
+  document.getElementById('prog-pct').textContent = '10%';
+
+  const ab = await file.arrayBuffer();
+  const wb = XLSX.read(ab, { type: 'array', cellDates: true });
+
+  // Buscar hoja PLANTILLA_TRABAJADORES o usar la primera
+  const nombreHoja = wb.SheetNames.find(n => n.includes('TRABAJADORES') || n.includes('Trabajadores'))
+    || wb.SheetNames[0];
+  const ws   = wb.Sheets[nombreHoja];
+  const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+
+  // Encontrar fila de encabezados (buscar fila con "RUT")
+  let headerRow = -1;
+  for (let i = 0; i < Math.min(10, rows.length); i++) {
+    if (rows[i].some(c => String(c).toUpperCase().includes('RUT'))) { headerRow = i; break; }
+  }
+  if (headerRow < 0) { showToast('No se encontró fila de encabezados con columna RUT', true); return; }
+
+  const headers  = rows[headerRow].map(h => String(h).trim());
+  const dataRows = rows.slice(headerRow + 1).filter(r => r.some(v => v !== ''));
+
+  document.getElementById('prog-fill').style.width = '40%';
+  document.getElementById('prog-pct').textContent  = '40%';
+
+  // Validar cada fila
+  datosExcel = [];
+  let okCount = 0, errCount = 0, dupCount = 0;
+
+  // Obtener RUTs ya cargados
+  try {
+    const resp = await fetch(`${GAS_URL}?action=getTrabajadores`);
+    const data = await resp.json();
+    rutsCargados = new Set((data.trabajadores || []).map(t =>
+      t.rut.replace(/\./g,'').replace(/-/g,'').toLowerCase()
+    ));
+  } catch(e) { rutsCargados = new Set(); }
+
+  dataRows.forEach((row, idx) => {
+    const obj  = {};
+    const errs = [];
+
+    headers.forEach((h, i) => { obj[h] = row[i] !== undefined ? String(row[i]).trim() : ''; });
+
+    const rut = (obj['RUT *'] || obj['RUT'] || '').trim();
+    if (!rut) { errs.push('RUT vacío'); }
+    else if (!validarRut(rut)) { errs.push('RUT inválido'); }
+
+    // Verificar duplicado
+    const rutNorm = rut.replace(/\./g,'').replace(/-/g,'').toLowerCase();
+    let esDup = false;
+    if (rutsCargados.has(rutNorm)) {
+      esDup = true;
+      errs.push('RUT ya existe en el sistema');
+    }
+
+    // Validar campos obligatorios mínimos
+    const nombre = (obj['Nombres *'] || obj['Nombres'] || '').trim();
+    if (!nombre) errs.push('Nombres vacío');
+    const apPat = (obj['Apellido Paterno *'] || obj['Apellido Paterno'] || '').trim();
+    if (!apPat) errs.push('Apellido Paterno vacío');
+    const email = (obj['Email Trabajador *'] || obj['Email Trabajador'] || '').trim();
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errs.push('Email inválido');
+    const os10 = (obj['OS-10 Número *'] || obj['OS-10 Número'] || '').trim();
+    if (!os10) errs.push('OS-10 número vacío');
+
+    const estado = errs.length === 0 ? 'ok'
+                 : esDup ? 'dup'
+                 : errs.length <= 2 ? 'warn' : 'error';
+    if (estado === 'ok') okCount++;
+    else if (esDup) dupCount++;
+    else errCount++;
+
+    datosExcel.push({ row: idx + 1, rut, nombre, apPat, obj, errs, estado });
+  });
+
+  document.getElementById('prog-fill').style.width = '100%';
+  document.getElementById('prog-pct').textContent = '100%';
+
+  // Render preview
+  document.getElementById('stat-total').textContent = `${datosExcel.length} filas`;
+  document.getElementById('stat-ok').textContent    = `${okCount} válidas`;
+  document.getElementById('stat-err').textContent   = `${errCount} errores`;
+  document.getElementById('stat-dup').textContent   = `${dupCount} duplicados`;
+
+  const tbody = document.getElementById('tbody-preview');
+  tbody.innerHTML = datosExcel.map(d => {
+    const cls   = d.estado;
+    const label = { ok: 'Válida', error: 'Error', warn: 'Advertencia', dup: 'Duplicado' }[cls];
+    const apMat = (d.obj['Apellido Materno *'] || d.obj['Apellido Materno'] || '');
+    return `<tr>
+      <td style="color:var(--pk-muted)">${d.row}</td>
+      <td style="font-family:var(--font-head)">${d.rut || '—'}</td>
+      <td>${d.nombre} ${d.apPat} ${apMat}</td>
+      <td style="font-size:.78rem">${(d.obj['OS-10 Categoría *']||d.obj['OS-10 Categoría']||'—').split('—')[0]}</td>
+      <td style="font-size:.78rem">${d.obj['AFP / Previsión *']||d.obj['AFP / Previsión']||'—'}</td>
+      <td style="font-size:.78rem">${d.obj['Sistema Salud *']||d.obj['Sistema Salud']||'—'}</td>
+      <td><span class="row-status ${cls}">${label}</span></td>
+      <td><div class="error-list">${d.errs.join(' · ')||''}</div></td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('excel-preview').style.display = 'block';
+  document.getElementById('btn-confirmar').disabled = okCount === 0;
+  setTimeout(() => document.getElementById('prog-validacion').classList.remove('show'), 800);
+  showToast(`✓ Excel procesado: ${okCount} válidos, ${errCount} con errores, ${dupCount} duplicados`);
+}
+
+function limpiarExcel() {
+  datosExcel = [];
+  document.getElementById('excel-preview').style.display = 'none';
+  document.getElementById('input-excel').value = '';
+}
+
+// ════════════════════════════════════════════════════════
+// CONFIRMAR CARGA MASIVA
+// ════════════════════════════════════════════════════════
+async function confirmarCarga() {
+  const validos = datosExcel.filter(d => d.estado === 'ok');
+  if (!validos.length) { showToast('No hay filas válidas para cargar', true); return; }
+
+  const modal     = document.getElementById('modal-carga');
+  const modalSub  = document.getElementById('modal-sub');
+  const modalProg = document.getElementById('modal-progress');
+  modal.classList.add('show');
+
+  const log  = document.getElementById('log-carga');
+  const prog = document.getElementById('prog-carga');
+  const fill = document.getElementById('prog-carga-fill');
+  log.style.display  = 'block';
+  prog.classList.add('show');
+  log.innerHTML = '';
+
+  let ok = 0, err = 0;
+
+  for (let i = 0; i < validos.length; i++) {
+    const d   = validos[i];
+    const pct = Math.round((i / validos.length) * 100);
+    fill.style.width = pct + '%';
+    document.getElementById('prog-carga-pct').textContent = pct + '%';
+    document.getElementById('prog-carga-label').textContent =
+      `Cargando ${i + 1} de ${validos.length}...`;
+    modalProg.textContent = `${i + 1} / ${validos.length}`;
+    modalSub.textContent  = `Procesando: ${d.nombre} ${d.apPat} (${d.rut})`;
+
+    const payload = mapearFila(d.obj, d.rut);
+    try {
+      let resp;
+      if (GAS_URL !== 'https://script.google.com/macros/s/AKfycbzr1LbD5OeV0lEn8jxafJUb1jjSxWyVL9pHMiJDA6NxoybaWLkloG_rxOKLrUBKOpyn/exec') {
+        const r = await fetch(GAS_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'nuevoIngreso', ...payload }),
+          headers: { 'Content-Type': 'application/json' }
+        });
+        resp = await r.json();
+      } else {
+        // Modo demo
+        await new Promise(r => setTimeout(r, 80));
+        resp = { success: true, ref: 'PK-DEMO-' + d.rut.replace(/\D/g,'').slice(0,6) };
+      }
+
+      if (resp.success) {
+        ok++;
+        logLine(log, `✓ ${d.rut} — ${d.nombre} ${d.apPat} → Ref: ${resp.ref}`, 'ok');
+      } else {
+        err++;
+        logLine(log, `✗ ${d.rut} — ${resp.error || resp.message}`, 'err');
+      }
+    } catch(e) {
+      err++;
+      logLine(log, `✗ ${d.rut} — Error de conexión`, 'err');
+    }
+  }
+
+  fill.style.width = '100%';
+  document.getElementById('prog-carga-pct').textContent = '100%';
+  modal.classList.remove('show');
+
+  logLine(log, `─────────────────────────────────`, 'info');
+  logLine(log, `Carga completa: ${ok} exitosos / ${err} fallidos`, 'info');
+
+  // Guardar en historial
+  historialCargas.unshift({
+    fecha: new Date().toLocaleString('es-CL'),
+    tipo: 'Trabajadores Excel',
+    usuario: JSON.parse(sessionStorage.getItem('pk_user')||'{}').nombre || 'RR.HH.',
+    total: validos.length, ok, err
+  });
+
+  showToast(`✓ Carga completada: ${ok} trabajadores cargados`);
+  document.getElementById('btn-confirmar').disabled = true;
+}
+
+function mapearFila(obj, rut) {
+  const g = k => {
+    const keys = [k, k + ' *'];
+    for (const key of keys) { if (obj[key] !== undefined && obj[key] !== '') return obj[key]; }
+    return '';
+  };
+  return {
+    rut, nombres: g('Nombres'), ap_paterno: g('Apellido Paterno'),
+    ap_materno: g('Apellido Materno'), fecha_nac: g('Fecha Nacimiento'),
+    genero: g('Género'), estado_civil: g('Estado Civil'),
+    nacionalidad: g('Nacionalidad'), direccion: g('Dirección'),
+    comuna: g('Comuna'), region: g('Región'), telefono: g('Teléfono'),
+    email: g('Email Trabajador'),
+    emerg_nombre: g('Emergencia Nombre'), emerg_relacion: g('Emergencia Relación'),
+    emerg_tel: g('Emergencia Teléfono'), emerg_email: g('Emergencia Email'),
+    cargas: g('N° Cargas'), cargas_detalle: g('Detalle Cargas'),
+    os10_num: g('OS-10 Número'), os10_venc: g('OS-10 Vencimiento'),
+    os10_cat: g('OS-10 Categoría'), licencia: g('Licencia Conducir'),
+    afp: g('AFP / Previsión'), salud: g('Sistema Salud'),
+    isapre: g('ISAPRE Nombre'), mutual: g('Mutual'),
+    grupo_sg: g('Grupo Sanguíneo'), alergias: g('Alergias'),
+    antec_com: g('Antec. Comerciales'), antec_pen: g('Antec. Penales'),
+    exam_psico: g('Examen Psicológico'), fecha_psico: g('Fecha Exam. Psic.'),
+    exam_fisico: g('Examen Físico'), fecha_fisico: g('Fecha Exam. Físico'),
+    ffaa_rama: g('FFAA Rama'), ffaa_grado: g('FFAA Grado Retiro'),
+    ffaa_anios: g('FFAA Años Servicio'), ffaa_retiro: g('FFAA Año Retiro'),
+    banco: g('Banco'), tipo_cuenta: g('Tipo Cuenta'), num_cuenta: g('Número Cuenta'),
+    obs_pago: g('Obs. Pago'), nivel_estudios: g('Nivel Estudios'),
+    institucion: g('Institución'), anio_egreso: g('Año Egreso'), titulo: g('Título / Especialidad'),
+    curso_os10: g('Curso OS-10'), curso_pa: g('Curso Primeros Aux.'),
+    curso_pi: g('Curso Prev. Incendios'), curso_md: g('Manejo Defensivo'),
+    otros_cursos: g('Otros Cursos'), exp_seguridad: g('Exp. en Seguridad'),
+    ultima_empresa: g('Última Empresa'), obs_experiencia: g('Obs. Experiencia'),
+    instalacion: g('Instalación / Cliente'),
+  };
+}
+
+function exportarErrores() {
+  const conError = datosExcel.filter(d => d.estado !== 'ok' && d.estado !== 'dup');
+  if (!conError.length) { showToast('No hay filas con errores', true); return; }
+  const rows = [['Fila','RUT','Nombre','Errores'],
+    ...conError.map(d => [d.row, d.rut, `${d.nombre} ${d.apPat}`, d.errs.join(' | ')])];
+  const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = 'PK_Errores_Carga.csv'; a.click();
+  showToast('Exportando filas con errores...');
+}
+
+// ════════════════════════════════════════════════════════
+// PROCESAR DOCUMENTOS
+// ════════════════════════════════════════════════════════
+function selFolder(el, nombre) {
+  document.querySelectorAll('#folder-chips-masivo .folder-chip').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  carpetaSeleccionada = nombre;
+}
+
+function handleDocsDrop(e) {
+  e.preventDefault();
+  document.getElementById('uz-docs').classList.remove('drag');
+  procesarDocs(e.dataTransfer.files);
+}
+
+async function procesarDocs(files) {
+  if (!files?.length) return;
+  docsFiles = Array.from(files);
+
+  // Obtener RUTs del sistema
+  let rutsConocidos = {};
+  try {
+    const r = await fetch(`${GAS_URL}?action=getTrabajadores`);
+    const d = await r.json();
+    (d.trabajadores || []).forEach(t => {
+      const norm = t.rut.replace(/\./g,'').replace(/-/g,'').toLowerCase();
+      rutsConocidos[norm] = t.nombre;
+    });
+  } catch(e) {
+    // demo
+    rutsConocidos = { '123456789': 'Juan González', '112345678': 'María Rodríguez' };
+  }
+
+  let asociados = 0, sinRut = 0;
+  const rows = docsFiles.map((f, i) => {
+    // Extraer RUT del nombre del archivo
+    const match = f.name.match(/^(\d{7,8}-[\dkK])/i);
+    const rut   = match ? match[1].toLowerCase() : null;
+    const rutNorm = rut ? rut.replace(/-/g,'').replace(/\./g,'') : null;
+    const trabajador = rutNorm ? (rutsConocidos[rutNorm] || 'RUT no encontrado') : '—';
+    const encontrado = rutNorm && rutsConocidos[rutNorm];
+    if (encontrado) asociados++; else sinRut++;
+
+    return { file: f, rut, rutNorm, trabajador, encontrado, idx: i };
+  });
+
+  document.getElementById('doc-stat-total').textContent = `${docsFiles.length} archivos`;
+  document.getElementById('doc-stat-ok').textContent    = `${asociados} asociados`;
+  document.getElementById('doc-stat-err').textContent   = `${sinRut} sin RUT`;
+
+  if (sinRut > 0) {
+    document.getElementById('docs-sin-rut-warn').textContent =
+      `⚠ ${sinRut} archivo(s) sin RUT detectable se omitirán.`;
+  }
+
+  const tbody = document.getElementById('tbody-docs');
+  tbody.innerHTML = rows.map(r => `
+    <tr>
+      <td style="color:var(--pk-muted)">${r.idx + 1}</td>
+      <td style="font-size:.8rem;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${r.file.name}">${r.file.name}</td>
+      <td style="color:var(--pk-muted);font-size:.78rem">${(r.file.size/1024).toFixed(0)} KB</td>
+      <td style="font-family:var(--font-head);font-size:.82rem">${r.rut || '—'}</td>
+      <td style="font-size:.82rem">${r.trabajador}</td>
+      <td style="font-size:.78rem;color:var(--pk-muted)">${carpetaSeleccionada}</td>
+      <td><span class="row-status ${r.encontrado ? 'ok' : r.rut ? 'warn' : 'error'}">${r.encontrado ? 'Listo' : r.rut ? 'Sin match' : 'Sin RUT'}</span></td>
+    </tr>`).join('');
+
+  document.getElementById('docs-preview').style.display = 'block';
+}
+
+function limpiarDocs() {
+  docsFiles = [];
+  document.getElementById('docs-preview').style.display = 'none';
+  document.getElementById('input-docs').value = '';
+}
+
+async function subirDocumentos() {
+  const listos = docsFiles.filter((f, i) => {
+    const match = f.name.match(/^(\d{7,8}-[\dkK])/i);
+    return match !== null;
+  });
+
+  if (!listos.length) { showToast('No hay documentos con RUT detectado', true); return; }
+
+  const log  = document.getElementById('log-docs');
+  const fill = document.getElementById('prog-docs-fill');
+  log.style.display = 'block';
+  log.innerHTML = '';
+
+  let ok = 0, err = 0;
+  const tipo = document.getElementById('doc-tipo-masivo').value || 'Documento';
+  const periodo = document.getElementById('doc-periodo').value;
+
+  for (let i = 0; i < listos.length; i++) {
+    const f   = listos[i];
+    const pct = Math.round((i / listos.length) * 100);
+    fill.style.width = pct + '%';
+    document.getElementById('prog-docs-pct').textContent = pct + '%';
+    document.getElementById('prog-docs-label').textContent = `Subiendo ${i + 1} de ${listos.length}...`;
+
+    try {
+      // Convertir a base64 y enviar al GAS
+      const b64 = await fileToBase64(f);
+      const rut = f.name.match(/^(\d{7,8}-[\dkK])/i)[1];
+
+      if (GAS_URL !== 'https://script.google.com/macros/s/AKfycbzr1LbD5OeV0lEn8jxafJUb1jjSxWyVL9pHMiJDA6NxoybaWLkloG_rxOKLrUBKOpyn/exec') {
+        await fetch(GAS_URL, {
+          method: 'POST',
+          body: JSON.stringify({
+            action: 'subirDocumento',
+            rut, tipo_doc: tipo, subcarpeta: carpetaSeleccionada,
+            periodo, nombre_archivo: f.name,
+            archivo_b64: b64, mime_type: f.type,
+          }),
+          headers: { 'Content-Type': 'application/json' }
+        });
+      } else {
+        await new Promise(r => setTimeout(r, 60));
+      }
+      ok++;
+      logLine(log, `✓ ${f.name} → ${carpetaSeleccionada}`, 'ok');
+    } catch(e) {
+      err++;
+      logLine(log, `✗ ${f.name} — Error al subir`, 'err');
+    }
+  }
+
+  fill.style.width = '100%';
+  document.getElementById('prog-docs-pct').textContent = '100%';
+  document.getElementById('prog-docs-label').textContent = 'Completado';
+  logLine(log, `─────────────────────`, 'info');
+  logLine(log, `${ok} subidos / ${err} fallidos`, 'info');
+
+  historialCargas.unshift({
+    fecha: new Date().toLocaleString('es-CL'),
+    tipo: `Documentos — ${tipo}`,
+    usuario: JSON.parse(sessionStorage.getItem('pk_user')||'{}').nombre || 'RR.HH.',
+    total: listos.length, ok, err
+  });
+
+  showToast(`✓ ${ok} documento(s) subidos correctamente`);
+}
+
+// ════════════════════════════════════════════════════════
+// HISTORIAL
+// ════════════════════════════════════════════════════════
+function renderHistorial() {
+  const tbody = document.getElementById('tbody-historial');
+  if (!historialCargas.length) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--pk-muted);padding:2rem;">Sin cargas registradas aún.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = historialCargas.map(h => `
+    <tr>
+      <td style="color:var(--pk-muted);font-size:.82rem">${h.fecha}</td>
+      <td>${h.tipo}</td>
+      <td>${h.usuario}</td>
+      <td><span class="stat-pill total">${h.total}</span></td>
+      <td><span class="stat-pill ok">${h.ok}</span></td>
+      <td><span class="stat-pill error">${h.err}</span></td>
+      <td style="color:${h.err>0?'var(--pk-orange)':'var(--pk-green)'};font-size:.82rem">
+        ${h.err > 0 ? '⚠ Revisar errores' : '✓ Completo'}
+      </td>
+    </tr>`).join('');
+}
+
+// ════════════════════════════════════════════════════════
+// HELPERS
+// ════════════════════════════════════════════════════════
+function validarRut(rut) {
+  rut = rut.replace(/\./g,'').replace(/-/g,'').toUpperCase();
+  if (rut.length < 2) return false;
+  const body = rut.slice(0,-1);
+  const dv   = rut.slice(-1);
+  if (!/^\d+$/.test(body)) return false;
+  let sum = 0, mul = 2;
+  for (let i = body.length-1; i >= 0; i--) {
+    sum += parseInt(body[i]) * mul;
+    mul = mul === 7 ? 2 : mul + 1;
+  }
+  const exp = 11 - (sum % 11);
+  const calc = exp === 11 ? '0' : exp === 10 ? 'K' : String(exp);
+  return dv === calc;
+}
+
+function fileToBase64(file) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload  = () => res(r.result.split(',')[1]);
+    r.onerror = rej;
+    r.readAsDataURL(file);
+  });
+}
+
+function logLine(container, msg, type) {
+  const div = document.createElement('div');
+  div.className = `log-${type}`;
+  div.textContent = `[${new Date().toLocaleTimeString('es-CL')}] ${msg}`;
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+}
+
+function showToast(msg, error = false) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show' + (error ? ' error' : '');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('show'), 3500);
+}
+
+// Auth check
+document.addEventListener('DOMContentLoaded', () => {
+  const user = JSON.parse(sessionStorage.getItem('pk_user') || 'null');
+  if (!user) { window.location.href = 'pk_login.html'; return; }
+  if (user.perfil === 'Prevención de Riesgos') {
+    document.querySelector('[onclick="showTab(\'trabajadores\')"]').style.display = 'none';
+    showTab('documentos');
+  }
+  if (user.perfil?.includes('Gerencia')) {
+    window.location.href = 'pk_login.html';
+  }
+});
+</script>
+</body>
+</html>

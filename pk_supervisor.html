@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PK SpA — Panel Supervisor</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=DM+Mono:wght@400;500&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --pk-black:#0a0c0f; --pk-panel:#161b22; --pk-panel2:#1c2128;
+    --pk-border:#21262d; --pk-border-light:#30363d;
+    --pk-gold:#c9a84c; --pk-gold-glow:rgba(201,168,76,0.12);
+    --pk-red:#d9534f; --pk-green:#3fb950; --pk-blue:#58a6ff;
+    --pk-orange:#f0883e; --pk-text:#e6edf3; --pk-muted:#7d8590;
+    --pk-input-bg:#0d1117;
+    --accent:#3fb950; --accent-glow:rgba(63,185,80,0.1);
+    --font-head:'Rajdhani',sans-serif;
+    --font-body:'Source Sans 3',sans-serif;
+    --font-mono:'DM Mono',monospace;
+    --sidebar-w:240px;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--pk-black);color:var(--pk-text);font-family:var(--font-body);font-size:14px;display:flex;min-height:100vh;}
+
+  .sidebar{width:var(--sidebar-w);background:var(--pk-panel);border-right:1px solid var(--pk-border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;}
+  .sidebar-logo{padding:1.25rem 1.5rem;border-bottom:1px solid var(--pk-border);display:flex;align-items:center;gap:10px;}
+  .s-hex{width:34px;height:34px;background:var(--pk-gold);clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .s-hex span{font-family:var(--font-head);font-weight:700;font-size:12px;color:var(--pk-black);}
+  .s-title{font-family:var(--font-head);font-size:.9rem;font-weight:600;letter-spacing:.06em;}
+  .s-sub{font-size:.68rem;color:var(--pk-muted);}
+  .sidebar-user{padding:1rem 1.5rem;border-bottom:1px solid var(--pk-border);background:var(--accent-glow);}
+  .su-label{font-size:.65rem;color:var(--pk-muted);letter-spacing:.12em;text-transform:uppercase;}
+  .su-name{font-family:var(--font-head);font-size:1rem;font-weight:600;color:var(--accent);margin-top:2px;}
+  .su-role{display:inline-block;font-size:.65rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--pk-black);background:var(--accent);padding:2px 8px;margin-top:4px;}
+  .sidebar-nav{flex:1;padding:1rem 0;overflow-y:auto;}
+  .nav-section{font-family:var(--font-head);font-size:.65rem;font-weight:600;letter-spacing:.18em;color:var(--pk-muted);text-transform:uppercase;padding:.75rem 1.5rem .4rem;}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:10px 1.5rem;cursor:pointer;transition:all .15s;border-left:3px solid transparent;font-size:.88rem;color:var(--pk-muted);}
+  .nav-item:hover{background:var(--accent-glow);color:var(--pk-text);}
+  .nav-item.active{background:var(--accent-glow);color:var(--accent);border-left-color:var(--accent);}
+  .nav-item .ni-icon{font-size:1rem;width:20px;text-align:center;}
+  .sidebar-footer{padding:1rem 1.5rem;border-top:1px solid var(--pk-border);display:flex;flex-direction:column;gap:8px;}
+  .btn-inicio{display:block;text-align:center;text-decoration:none;background:transparent;border:1px solid var(--pk-gold);color:var(--pk-gold);font-family:var(--font-head);font-size:.75rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:8px;transition:all .2s;}
+  .btn-inicio:hover{background:var(--pk-gold-glow);}
+  .btn-logout{width:100%;background:transparent;border:1px solid var(--pk-border-light);color:var(--pk-muted);font-family:var(--font-head);font-size:.75rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:8px;cursor:pointer;transition:all .2s;}
+  .btn-logout:hover{border-color:var(--pk-red);color:var(--pk-red);}
+
+  .main{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;}
+  .topbar{background:var(--pk-panel);border-bottom:1px solid var(--pk-border);padding:0 2rem;height:56px;display:flex;align-items:center;gap:1rem;position:sticky;top:0;z-index:50;}
+  .topbar-title{font-family:var(--font-head);font-size:1.1rem;font-weight:600;letter-spacing:.06em;}
+  .topbar-badge{font-family:var(--font-mono);font-size:.78rem;color:var(--accent);background:var(--accent-glow);border:1px solid rgba(63,185,80,.2);padding:4px 12px;}
+  .topbar-actions{margin-left:auto;display:flex;gap:8px;}
+  .content{padding:2rem;flex:1;}
+
+  .btn{font-family:var(--font-head);font-size:.8rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:9px 20px;border:none;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:7px;}
+  .btn-green{background:var(--accent);color:var(--pk-black);}
+  .btn-green:hover{background:#52d467;}
+  .btn-secondary{background:transparent;border:1px solid var(--pk-border-light);color:var(--pk-muted);}
+  .btn-secondary:hover{border-color:var(--accent);color:var(--accent);}
+
+  .panel{display:none;}
+  .panel.active{display:block;animation:fadeIn .2s ease;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:translateY(0);}}
+
+  /* KPI */
+  .kpi-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:2rem;}
+  .kpi-card{background:var(--pk-panel);border:1px solid var(--pk-border);padding:1.25rem;position:relative;}
+  .kpi-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+  .kpi-card.green::after{background:var(--accent);}
+  .kpi-card.gold::after{background:var(--pk-gold);}
+  .kpi-card.blue::after{background:var(--pk-blue);}
+  .kpi-card.orange::after{background:var(--pk-orange);}
+  .kpi-label{font-size:.68rem;color:var(--pk-muted);letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px;}
+  .kpi-val{font-family:var(--font-mono);font-size:1.8rem;font-weight:500;line-height:1;}
+  .kpi-card.green .kpi-val{color:var(--accent);}
+  .kpi-card.gold .kpi-val{color:var(--pk-gold);}
+  .kpi-card.blue .kpi-val{color:var(--pk-blue);}
+  .kpi-card.orange .kpi-val{color:var(--pk-orange);}
+  .kpi-sub{font-size:.72rem;color:var(--pk-muted);margin-top:5px;}
+
+  /* INSTALACIÓN CARD */
+  .inst-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem;margin-bottom:2rem;}
+  .inst-card{background:var(--pk-panel);border:1px solid var(--pk-border);border-top:3px solid var(--accent);padding:1.25rem;cursor:pointer;transition:all .2s;}
+  .inst-card:hover{border-color:var(--accent);background:var(--accent-glow);}
+  .inst-card.selected{border-color:var(--accent);background:var(--accent-glow);}
+  .inst-nombre{font-family:var(--font-head);font-size:1.05rem;font-weight:600;color:var(--pk-text);margin-bottom:.5rem;}
+  .inst-stats{display:flex;gap:1rem;flex-wrap:wrap;}
+  .inst-stat{text-align:center;}
+  .inst-stat-val{font-family:var(--font-mono);font-size:1.1rem;color:var(--accent);}
+  .inst-stat-label{font-size:.65rem;color:var(--pk-muted);text-transform:uppercase;letter-spacing:.08em;}
+
+  /* CARD */
+  .card{background:var(--pk-panel);border:1px solid var(--pk-border);margin-bottom:1.5rem;}
+  .card-header{padding:1rem 1.5rem;border-bottom:1px solid var(--pk-border);display:flex;align-items:center;gap:1rem;background:linear-gradient(90deg,var(--accent-glow),transparent);}
+  .card-title{font-family:var(--font-head);font-size:.95rem;font-weight:600;letter-spacing:.06em;color:var(--accent);}
+  .card-body{padding:1.5rem;}
+
+  /* TABLE */
+  .table-wrap{overflow-x:auto;}
+  table{width:100%;border-collapse:collapse;}
+  thead tr{background:var(--pk-panel2);}
+  th{padding:9px 12px;text-align:left;font-family:var(--font-head);font-size:.68rem;font-weight:600;letter-spacing:.12em;color:var(--pk-muted);text-transform:uppercase;border-bottom:1px solid var(--pk-border);white-space:nowrap;}
+  td{padding:9px 12px;font-size:.83rem;border-bottom:1px solid var(--pk-border);vertical-align:middle;}
+  tr:hover td{background:var(--accent-glow);}
+
+  .badge{display:inline-block;font-family:var(--font-head);font-size:.62rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:3px 9px;border:1px solid;}
+  .badge-activo{color:var(--accent);border-color:var(--accent);background:var(--accent-glow);}
+  .badge-pendiente{color:var(--pk-orange);border-color:var(--pk-orange);background:rgba(240,136,62,.08);}
+
+  .search-box{background:var(--pk-input-bg);border:1px solid var(--pk-border-light);color:var(--pk-text);font-family:var(--font-body);font-size:.85rem;padding:7px 12px;outline:none;transition:border-color .2s;}
+  .search-box:focus{border-color:var(--accent);}
+  .search-box::placeholder{color:var(--pk-muted);}
+
+  /* FICHA TRABAJADOR */
+  .ficha-wrap{background:var(--pk-panel2);border:1px solid var(--pk-border);padding:1.5rem;}
+  .ficha-header{display:flex;align-items:center;gap:1rem;margin-bottom:1.25rem;padding-bottom:1rem;border-bottom:1px solid var(--pk-border);}
+  .ficha-avatar{width:48px;height:48px;background:var(--accent-glow);border:2px solid var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;}
+  .ficha-nombre{font-family:var(--font-head);font-size:1.2rem;font-weight:600;}
+  .ficha-sub{font-size:.8rem;color:var(--pk-muted);}
+  .ficha-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px 2rem;}
+  .fi-label{font-size:.68rem;color:var(--pk-muted);letter-spacing:.08em;text-transform:uppercase;}
+  .fi-val{font-size:.88rem;font-weight:500;margin-top:1px;}
+  .ficha-sec{margin-bottom:1.25rem;}
+  .ficha-sec-t{font-family:var(--font-head);font-size:.72rem;font-weight:600;letter-spacing:.15em;color:var(--accent);text-transform:uppercase;border-bottom:1px solid var(--pk-border);padding-bottom:5px;margin-bottom:8px;}
+
+  /* CERT STATUS */
+  .cert-row{display:flex;align-items:center;gap:.75rem;padding:8px 0;border-bottom:1px solid var(--pk-border);}
+  .cert-icon{font-size:1.1rem;flex-shrink:0;}
+  .cert-nombre{flex:1;font-size:.85rem;}
+  .cert-fecha{font-family:var(--font-mono);font-size:.78rem;color:var(--pk-muted);}
+  .cert-estado{font-family:var(--font-head);font-size:.65rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:2px 8px;border:1px solid;}
+  .cert-vigente{color:var(--accent);border-color:var(--accent);background:var(--accent-glow);}
+  .cert-vencer{color:var(--pk-orange);border-color:var(--pk-orange);background:rgba(240,136,62,.08);}
+  .cert-vencido{color:var(--pk-red);border-color:var(--pk-red);background:rgba(217,83,79,.08);}
+
+  /* MODAL */
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:200;display:none;align-items:flex-start;justify-content:center;padding:2rem;overflow-y:auto;backdrop-filter:blur(4px);}
+  .modal-overlay.show{display:flex;}
+  .modal{background:var(--pk-panel);border:1px solid var(--pk-border);width:100%;max-width:720px;margin:auto;animation:mIn .25s ease both;}
+  @keyframes mIn{from{opacity:0;transform:translateY(-12px);}to{opacity:1;transform:translateY(0);}}
+  .modal-header{padding:1.25rem 1.5rem;border-bottom:1px solid var(--pk-border);display:flex;align-items:center;gap:1rem;background:var(--accent-glow);}
+  .modal-title{font-family:var(--font-head);font-size:1rem;font-weight:600;color:var(--accent);}
+  .modal-close{margin-left:auto;background:none;border:none;color:var(--pk-muted);font-size:1.3rem;cursor:pointer;}
+  .modal-close:hover{color:var(--pk-red);}
+  .modal-body{padding:1.5rem;max-height:80vh;overflow-y:auto;}
+  .modal-footer{padding:1rem 1.5rem;border-top:1px solid var(--pk-border);display:flex;justify-content:flex-end;gap:8px;}
+
+  .info-banner{background:var(--accent-glow);border:1px solid var(--pk-border);border-left:3px solid var(--accent);padding:.75rem 1.25rem;font-size:.82rem;color:var(--pk-muted);margin-bottom:1.5rem;}
+  .info-banner strong{color:var(--accent);}
+
+  .loading-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:300;display:none;align-items:center;justify-content:center;}
+  .loading-overlay.show{display:flex;}
+  .loading-box{background:var(--pk-panel);border:1px solid var(--pk-border);padding:2rem;text-align:center;}
+  .spinner{width:40px;height:40px;border:3px solid var(--pk-border-light);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 1rem;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  .toast{position:fixed;bottom:2rem;right:2rem;background:var(--pk-panel);border:1px solid var(--pk-border);border-left:3px solid var(--accent);padding:12px 20px;font-size:.88rem;color:var(--accent);z-index:999;display:none;}
+  .toast.show{display:block;}
+
+  /* RESPONSIVE */
+  @media(max-width:768px){
+    .kpi-strip{grid-template-columns:1fr 1fr;}
+    .inst-grid{grid-template-columns:1fr;}
+    .ficha-grid{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="s-hex"><span>PK</span></div>
+    <div><div class="s-title">PK SpA</div><div class="s-sub">Sistema RRHH</div></div>
+  </div>
+  <div class="sidebar-user">
+    <div class="su-label">Supervisor activo</div>
+    <div class="su-name" id="sb-nombre">—</div>
+    <div class="su-role">Supervisor</div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">Mi Operación</div>
+    <div class="nav-item active" onclick="showPanel('instalaciones')">
+      <span class="ni-icon">🏢</span> Mis Instalaciones
+    </div>
+    <div class="nav-item" onclick="showPanel('trabajadores')">
+      <span class="ni-icon">👥</span> Mis Trabajadores
+    </div>
+    <div class="nav-section">Consultas</div>
+    <div class="nav-item" onclick="showPanel('buscar')">
+      <span class="ni-icon">🔍</span> Buscar Trabajador
+    </div>
+    <div class="nav-item" onclick="showPanel('certificados')">
+      <span class="ni-icon">📜</span> Estado Certificados
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    <a class="btn-inicio" href="#" onclick="irAPantallaPrincipal()">🏠 Pantalla Principal</a>
+    <button class="btn-logout" onclick="logout()">⏻ Cerrar Sesión</button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title" id="topbar-title">Mis Instalaciones</div>
+    <div class="topbar-badge" id="topbar-instalaciones">— instalaciones</div>
+    <div class="topbar-actions">
+      <button class="btn btn-secondary" onclick="cargarDatos()">↻ Actualizar</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ══ PANEL: INSTALACIONES ══ -->
+    <div class="panel active" id="panel-instalaciones">
+      <div class="kpi-strip">
+        <div class="kpi-card green">
+          <div class="kpi-label">Mis Instalaciones</div>
+          <div class="kpi-val" id="kpi-inst">—</div>
+        </div>
+        <div class="kpi-card gold">
+          <div class="kpi-label">Trabajadores a Cargo</div>
+          <div class="kpi-val" id="kpi-trabaj">—</div>
+        </div>
+        <div class="kpi-card blue">
+          <div class="kpi-label">Activos Hoy</div>
+          <div class="kpi-val" id="kpi-activos">—</div>
+          <div class="kpi-sub">en turno</div>
+        </div>
+        <div class="kpi-card orange">
+          <div class="kpi-label">Cert. por Vencer</div>
+          <div class="kpi-val" id="kpi-cert-vencer">—</div>
+          <div class="kpi-sub">próx. 30 días</div>
+        </div>
+      </div>
+
+      <div class="info-banner">
+        <strong>Vista de Supervisor:</strong> Solo lectura. Visualiza trabajadores e instalaciones asignadas a tu cargo.
+        Para modificar información contacta a Recursos Humanos.
+      </div>
+
+      <div id="inst-grid" class="inst-grid"></div>
+
+      <!-- Trabajadores de la instalación seleccionada -->
+      <div id="inst-detalle" style="display:none">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title" id="inst-detalle-title">Trabajadores de la Instalación</div>
+            <button class="btn btn-secondary" style="margin-left:auto" onclick="cerrarDetalle()">✕ Cerrar</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nombre</th><th>RUT</th><th>Categoría</th>
+                  <th>Turno</th><th>OS-10 Vto.</th><th>Estado</th><th></th>
+                </tr>
+              </thead>
+              <tbody id="tbody-inst-detalle"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ PANEL: TODOS MIS TRABAJADORES ══ -->
+    <div class="panel" id="panel-trabajadores">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Mis Trabajadores a Cargo</div>
+          <input class="search-box" id="search-trab" placeholder="🔍 Buscar nombre o RUT..."
+                 oninput="filtrarTrabajadores()" style="width:240px;margin-left:auto">
+          <select class="search-box" id="filter-inst" style="width:200px" onchange="filtrarTrabajadores()">
+            <option value="">Todas las instalaciones</option>
+          </select>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Nombre</th><th>RUT</th><th>Categoría OS-10</th>
+                <th>Instalación</th><th>Turno</th>
+                <th>OS-10 Vto.</th><th>Exam. Psic.</th><th>Exam. Físico</th>
+                <th>Estado</th><th></th>
+              </tr>
+            </thead>
+            <tbody id="tbody-trabajadores">
+              <tr><td colspan="10" style="text-align:center;color:var(--pk-muted);padding:2rem">Cargando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ PANEL: BUSCAR ══ -->
+    <div class="panel" id="panel-buscar">
+      <div class="card">
+        <div class="card-header"><div class="card-title">Buscar Trabajador</div></div>
+        <div class="card-body">
+          <div style="display:flex;gap:1rem;margin-bottom:1.5rem;align-items:flex-end;">
+            <div style="flex:1">
+              <label style="display:block;font-family:var(--font-head);font-size:.7rem;font-weight:600;letter-spacing:.12em;color:var(--pk-muted);text-transform:uppercase;margin-bottom:6px">RUT o Nombre</label>
+              <input type="text" id="bq-valor" class="search-box" style="width:100%"
+                     placeholder="Ingrese RUT o nombre..."
+                     onkeydown="if(event.key==='Enter') buscarTrabajador()">
+            </div>
+            <button class="btn btn-green" onclick="buscarTrabajador()">🔍 Buscar</button>
+          </div>
+          <div id="bq-resultado"></div>
+          <div id="bq-noresult" style="display:none;color:var(--pk-muted);font-size:.85rem;padding:1rem;background:var(--pk-panel2);border:1px solid var(--pk-border)">
+            No se encontró el trabajador o no está asignado a tus instalaciones.
+          </div>
+          <div id="bq-no-asignado" style="display:none" class="info-banner" style="border-left-color:var(--pk-red)">
+            <strong>Acceso restringido:</strong> Este trabajador no está asignado a tus instalaciones.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ PANEL: CERTIFICADOS ══ -->
+    <div class="panel" id="panel-certificados">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Estado de Certificados — Mis Trabajadores</div>
+          <select class="search-box" id="filter-cert-inst" style="width:200px;margin-left:auto" onchange="renderCertificados()">
+            <option value="">Todas las instalaciones</option>
+          </select>
+        </div>
+        <div class="card-body" id="cert-contenido">
+          <div style="color:var(--pk-muted);font-size:.85rem">Cargando...</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL FICHA TRABAJADOR -->
+<div class="modal-overlay" id="modal-ficha">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-ficha-title">Ficha del Trabajador</div>
+      <button class="modal-close" onclick="closeModal('modal-ficha')">✕</button>
+    </div>
+    <div class="modal-body" id="modal-ficha-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-ficha')">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<div class="loading-overlay" id="loading">
+  <div class="loading-box">
+    <div class="spinner"></div>
+    <div style="font-family:var(--font-head);font-size:.9rem;color:var(--accent)">Cargando datos...</div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbzr1LbD5OeV0lEn8jxafJUb1jjSxWyVL9pHMiJDA6NxoybaWLkloG_rxOKLrUBKOpyn/exec';
+
+let misTrabajadores  = [];  // solo los asignados a este supervisor
+let misInstalaciones = [];  // instalaciones únicas del supervisor
+let userInfo         = {};
+let instSeleccionada = null;
+
+// ── INIT ──────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  userInfo = JSON.parse(sessionStorage.getItem('pk_user') || 'null');
+  if (!userInfo || userInfo.perfil !== 'Supervisor') {
+    window.location.href = 'pk_login.html'; return;
+  }
+  document.getElementById('sb-nombre').textContent = userInfo.nombre;
+  cargarDatos();
+});
+
+// ── NAVEGACIÓN ─────────────────────────────────────────
+function showPanel(id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const panel = document.getElementById('panel-' + id);
+  if (panel) panel.classList.add('active');
+  const nav = document.querySelector(`[onclick="showPanel('${id}')"]`);
+  if (nav) nav.classList.add('active');
+  const titles = {
+    instalaciones: 'Mis Instalaciones',
+    trabajadores:  'Mis Trabajadores',
+    buscar:        'Buscar Trabajador',
+    certificados:  'Estado de Certificados'
+  };
+  document.getElementById('topbar-title').textContent = titles[id] || id;
+  if (id === 'certificados') renderCertificados();
+}
+
+function logout() {
+  sessionStorage.removeItem('pk_user');
+  window.location.href = 'pk_login.html';
+}
+
+// ── CARGAR DATOS ───────────────────────────────────────
+async function cargarDatos() {
+  document.getElementById('loading').classList.add('show');
+  try {
+    // Obtener TODOS los trabajadores y filtrar por instalaciones del supervisor
+    const r = await fetch(`${GAS_URL}?action=getTrabajadores`);
+    const d = await r.json();
+    const todos = d.trabajadores || [];
+
+    // Filtrar por instalaciones asignadas al supervisor
+    // Las instalaciones del supervisor se guardan en la hoja Usuarios
+    // campo: instalaciones_asignadas (separadas por coma)
+    const instAsignadas = (userInfo.instalaciones || '').split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
+
+    if (instAsignadas.length > 0) {
+      misTrabajadores = todos.filter(t => {
+        const instTrab = (t.cliente || t.cliente_instalacion || t.instalacion || '').toLowerCase();
+        return instAsignadas.some(inst => instTrab.includes(inst));
+      });
+    } else {
+      // Si no hay instalaciones configuradas, mostrar todos (para demo)
+      misTrabajadores = todos;
+    }
+
+    // Extraer instalaciones únicas
+    const instSet = new Set();
+    misTrabajadores.forEach(t => {
+      const inst = t.cliente || t.cliente_instalacion || t.instalacion || '';
+      if (inst) instSet.add(inst);
+    });
+    misInstalaciones = Array.from(instSet).sort();
+
+  } catch(e) {
+    // MODO DEMO
+    misTrabajadores = generarDemoTrabajadores();
+    misInstalaciones = [...new Set(misTrabajadores.map(t => t.cliente || ''))].filter(Boolean);
+  }
+
+  document.getElementById('loading').classList.remove('show');
+  document.getElementById('topbar-instalaciones').textContent =
+    `${misInstalaciones.length} instalación(es)`;
+
+  poblarFiltros();
+  renderKPIs();
+  renderInstalaciones();
+  renderTrabajadores(misTrabajadores);
+}
+
+function generarDemoTrabajadores() {
+  return [
+    { ref:'PK-001', nombre:'Juan Carlos González Pérez',  rut:'12.345.678-9',
+      os10_cat:'OS-10 Cat. A', os10_venc:'2025-12-31', turno:'Turno Noche',
+      exam_psico:'Aprobado — Vigente', exam_fisico:'Aprobado — Vigente',
+      estado:'Contratado', cliente:'Weir Minerals — Planta Norte', genero:'Masculino' },
+    { ref:'PK-002', nombre:'María Isabel Rodríguez Soto', rut:'11.234.567-8',
+      os10_cat:'OS-10 Cat. B', os10_venc:'2025-06-30', turno:'Turno Día',
+      exam_psico:'Aprobado — Por renovar', exam_fisico:'Aprobado — Vigente',
+      estado:'Contratado', cliente:'Weir Minerals — Planta Norte', genero:'Femenino' },
+    { ref:'PK-003', nombre:'Pedro Antonio Muñoz Lagos',   rut:'10.345.678-7',
+      os10_cat:'OS-10 Cat. A', os10_venc:'2026-03-31', turno:'Turno Mixto',
+      exam_psico:'Aprobado — Vigente', exam_fisico:'Aprobado — Vigente',
+      estado:'Contratado', cliente:'Soprole — Bodega Central', genero:'Masculino' },
+    { ref:'PK-004', nombre:'Ana Luisa Vargas Mora',       rut:'9.456.789-6',
+      os10_cat:'OS-10 Cat. C', os10_venc:'2025-09-15', turno:'Turno Día',
+      exam_psico:'Aprobado — Vigente', exam_fisico:'Aprobado — Por renovar',
+      estado:'Contratado', cliente:'Soprole — Bodega Central', genero:'Femenino' },
+    { ref:'PK-005', nombre:'Carlos Eduardo Fuentes Díaz', rut:'8.567.890-5',
+      os10_cat:'OS-10 Cat. A', os10_venc:'2025-05-20', turno:'Turno Noche',
+      exam_psico:'Aprobado — Vigente', exam_fisico:'Aprobado — Vigente',
+      estado:'Contratado', cliente:'Air Liquide — Planta Sur', genero:'Masculino' },
+  ];
+}
+
+// ── KPIs ───────────────────────────────────────────────
+function renderKPIs() {
+  const hoy    = new Date(); hoy.setHours(0,0,0,0);
+  const activos = misTrabajadores.filter(t => t.estado === 'Contratado').length;
+
+  // Contar certificados por vencer en 30 días
+  let certVencer = 0;
+  misTrabajadores.forEach(t => {
+    ['os10_venc'].forEach(campo => {
+      if (t[campo]) {
+        const venc = new Date(t[campo]);
+        const dias = Math.floor((venc - hoy)/(1000*60*60*24));
+        if (dias >= 0 && dias <= 30) certVencer++;
+      }
+    });
+  });
+
+  document.getElementById('kpi-inst').textContent    = misInstalaciones.length;
+  document.getElementById('kpi-trabaj').textContent  = misTrabajadores.length;
+  document.getElementById('kpi-activos').textContent = activos;
+  document.getElementById('kpi-cert-vencer').textContent = certVencer;
+}
+
+// ── INSTALACIONES ──────────────────────────────────────
+function renderInstalaciones() {
+  const grid = document.getElementById('inst-grid');
+  if (!misInstalaciones.length) {
+    grid.innerHTML = '<div style="color:var(--pk-muted);font-size:.85rem">No hay instalaciones asignadas a tu perfil. Contacta a Recursos Humanos.</div>';
+    return;
+  }
+  grid.innerHTML = misInstalaciones.map(inst => {
+    const trabsInst = misTrabajadores.filter(t => (t.cliente||t.cliente_instalacion||t.instalacion||'') === inst);
+    const activos   = trabsInst.filter(t => t.estado === 'Contratado').length;
+    const hoy = new Date(); hoy.setHours(0,0,0,0);
+    const certAlert = trabsInst.filter(t => {
+      if (!t.os10_venc) return false;
+      const dias = Math.floor((new Date(t.os10_venc) - hoy)/(1000*60*60*24));
+      return dias >= 0 && dias <= 30;
+    }).length;
+
+    return `
+      <div class="inst-card" onclick="verInstalacion('${inst.replace(/'/g,'\\'')}')">
+        <div class="inst-nombre">🏢 ${inst}</div>
+        <div class="inst-stats">
+          <div class="inst-stat">
+            <div class="inst-stat-val">${trabsInst.length}</div>
+            <div class="inst-stat-label">Guardias</div>
+          </div>
+          <div class="inst-stat">
+            <div class="inst-stat-val">${activos}</div>
+            <div class="inst-stat-label">Activos</div>
+          </div>
+          ${certAlert > 0 ? `
+          <div class="inst-stat">
+            <div class="inst-stat-val" style="color:var(--pk-orange)">${certAlert}</div>
+            <div class="inst-stat-label" style="color:var(--pk-orange)">OS-10 vencer</div>
+          </div>` : ''}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function verInstalacion(inst) {
+  instSeleccionada = inst;
+  const trabsInst = misTrabajadores.filter(t =>
+    (t.cliente||t.cliente_instalacion||t.instalacion||'') === inst
+  );
+  document.getElementById('inst-detalle-title').textContent = `Guardias en: ${inst}`;
+  document.getElementById('tbody-inst-detalle').innerHTML = trabsInst.map(t => filaTabla(t)).join('');
+  document.getElementById('inst-detalle').style.display = '';
+  document.getElementById('inst-detalle').scrollIntoView({ behavior:'smooth', block:'start' });
+
+  // Marcar card seleccionada
+  document.querySelectorAll('.inst-card').forEach(c => c.classList.remove('selected'));
+  document.querySelectorAll('.inst-card').forEach(c => {
+    if (c.querySelector('.inst-nombre')?.textContent.includes(inst)) c.classList.add('selected');
+  });
+}
+
+function cerrarDetalle() {
+  document.getElementById('inst-detalle').style.display = 'none';
+  document.querySelectorAll('.inst-card').forEach(c => c.classList.remove('selected'));
+}
+
+// ── TABLA TRABAJADORES ─────────────────────────────────
+function renderTrabajadores(lista) {
+  const tbody = document.getElementById('tbody-trabajadores');
+  tbody.innerHTML = lista.map(t => filaTabla(t)).join('') ||
+    '<tr><td colspan="10" style="text-align:center;color:var(--pk-muted);padding:2rem">Sin trabajadores</td></tr>';
+}
+
+function filaTabla(t) {
+  const hoy = new Date(); hoy.setHours(0,0,0,0);
+  const vencOS10 = t.os10_venc ? Math.floor((new Date(t.os10_venc) - hoy)/(1000*60*60*24)) : null;
+  const colorOS10 = vencOS10 !== null ? (vencOS10 < 0 ? 'var(--pk-red)' : vencOS10 <= 30 ? 'var(--pk-orange)' : 'var(--pk-muted)') : 'var(--pk-muted)';
+
+  return `<tr>
+    <td>${t.nombre}</td>
+    <td style="font-family:var(--font-mono);font-size:.78rem">${t.rut}</td>
+    <td style="font-size:.78rem">${(t.os10_cat||'—').split('—')[0]}</td>
+    <td style="font-size:.78rem;color:var(--pk-gold)">${t.cliente||t.cliente_instalacion||t.instalacion||'—'}</td>
+    <td style="font-size:.78rem">${t.turno||t.turno_asignado||'—'}</td>
+    <td style="font-family:var(--font-mono);font-size:.78rem;color:${colorOS10}">${t.os10_venc||'—'}</td>
+    <td style="font-size:.75rem;color:${(t.exam_psico||'').includes('renovar')?'var(--pk-orange)':'var(--pk-muted)'}">${(t.exam_psico||'—').split('—')[0]}</td>
+    <td style="font-size:.75rem;color:${(t.exam_fisico||'').includes('renovar')?'var(--pk-orange)':'var(--pk-muted)'}">${(t.exam_fisico||'—').split('—')[0]}</td>
+    <td><span class="badge ${t.estado==='Contratado'?'badge-activo':'badge-pendiente'}">${t.estado||'—'}</span></td>
+    <td><button class="btn btn-secondary" style="padding:3px 10px;font-size:.7rem" onclick="verFicha('${t.ref}')">Ver</button></td>
+  </tr>`;
+}
+
+function filtrarTrabajadores() {
+  const q    = document.getElementById('search-trab').value.toLowerCase();
+  const inst = document.getElementById('filter-inst').value;
+  const filtrado = misTrabajadores.filter(t => {
+    const matchQ    = !q || t.nombre?.toLowerCase().includes(q) || t.rut?.includes(q);
+    const matchInst = !inst || (t.cliente||t.cliente_instalacion||t.instalacion||'') === inst;
+    return matchQ && matchInst;
+  });
+  renderTrabajadores(filtrado);
+}
+
+function poblarFiltros() {
+  const opts = '<option value="">Todas las instalaciones</option>' +
+    misInstalaciones.map(i => `<option value="${i}">${i}</option>`).join('');
+  ['filter-inst','filter-cert-inst'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = opts;
+  });
+}
+
+// ── BUSCAR TRABAJADOR ──────────────────────────────────
+function buscarTrabajador() {
+  const q    = document.getElementById('bq-valor').value.trim().toLowerCase();
+  const res  = document.getElementById('bq-resultado');
+  const noR  = document.getElementById('bq-noresult');
+  const noA  = document.getElementById('bq-no-asignado');
+  res.innerHTML = '';
+  noR.style.display = 'none';
+  noA.style.display = 'none';
+  if (!q) return;
+
+  const qNorm = q.replace(/\./g,'').replace(/-/g,'');
+
+  // Buscar SOLO entre mis trabajadores
+  const t = misTrabajadores.find(x =>
+    (x.rut||'').replace(/\./g,'').replace(/-/g,'').toLowerCase() === qNorm ||
+    (x.nombre||'').toLowerCase().includes(q)
+  );
+
+  if (!t) {
+    noR.style.display = 'block';
+    return;
+  }
+
+  res.innerHTML = fichaCompletaHTML(t);
+}
+
+// ── VER FICHA COMPLETA ─────────────────────────────────
+function verFicha(ref) {
+  const t = misTrabajadores.find(x => x.ref === ref);
+  if (!t) return;
+  document.getElementById('modal-ficha-title').textContent = `Ficha — ${t.nombre}`;
+  document.getElementById('modal-ficha-body').innerHTML = fichaCompletaHTML(t);
+  openModal('modal-ficha');
+}
+
+function fichaCompletaHTML(t) {
+  const hoy = new Date(); hoy.setHours(0,0,0,0);
+  const calcEstadoCert = (fecha) => {
+    if (!fecha) return { cls:'cert-vencido', label:'Sin fecha' };
+    const dias = Math.floor((new Date(fecha) - hoy)/(1000*60*60*24));
+    if (dias < 0)   return { cls:'cert-vencido', label:'Vencido' };
+    if (dias <= 30) return { cls:'cert-vencer',  label:`${dias} días` };
+    if (dias <= 60) return { cls:'cert-vencer',  label:`${dias} días` };
+    return { cls:'cert-vigente', label:'Vigente' };
+  };
+
+  const os10Est  = calcEstadoCert(t.os10_venc);
+  const psicoEst = { cls: (t.exam_psico||'').includes('renovar') ? 'cert-vencer' : 'cert-vigente', label: (t.exam_psico||'').includes('Vigente') ? 'Vigente' : 'Por renovar' };
+  const fisicoEst= { cls: (t.exam_fisico||'').includes('renovar') ? 'cert-vencer' : 'cert-vigente', label: (t.exam_fisico||'').includes('Vigente') ? 'Vigente' : 'Por renovar' };
+
+  return `
+    <div class="ficha-wrap">
+      <div class="ficha-header">
+        <div class="ficha-avatar">👤</div>
+        <div>
+          <div class="ficha-nombre">${t.nombre}</div>
+          <div class="ficha-sub">${t.rut} · ${(t.os10_cat||'—').split('—')[0]}</div>
+        </div>
+        <div style="margin-left:auto">
+          <span class="badge ${t.estado==='Contratado'?'badge-activo':'badge-pendiente'}">${t.estado||'—'}</span>
+        </div>
+      </div>
+
+      <div class="ficha-sec">
+        <div class="ficha-sec-t">Asignación</div>
+        <div class="ficha-grid">
+          ${fi('Instalación', t.cliente||t.cliente_instalacion||t.instalacion||'—')}
+          ${fi('Turno', t.turno||t.turno_asignado||'—')}
+          ${fi('N° Turno', t.num_turno||t['n_turno_jornada']||'—')}
+          ${fi('Tipo Contrato', t.tipo_contrato||'—')}
+        </div>
+      </div>
+
+      <div class="ficha-sec">
+        <div class="ficha-sec-t">Datos de Contacto</div>
+        <div class="ficha-grid">
+          ${fi('Teléfono', t.telefono||'—')}
+          ${fi('Email', t.email||'—')}
+          ${fi('Emergencia', (t.emerg_nombre||t.emergencia_nombre||'—') + ' — ' + (t.emerg_tel||t.emergencia_telefono||''))}
+        </div>
+      </div>
+
+      <div class="ficha-sec">
+        <div class="ficha-sec-t">Estado de Certificados y Exámenes</div>
+        <div class="cert-row">
+          <div class="cert-icon">🛡️</div>
+          <div class="cert-nombre">Credencial OS-10</div>
+          <div class="cert-fecha">${t.os10_venc||'—'}</div>
+          <span class="cert-estado ${os10Est.cls}">${os10Est.label}</span>
+        </div>
+        <div class="cert-row">
+          <div class="cert-icon">🧠</div>
+          <div class="cert-nombre">Examen Psicológico</div>
+          <div class="cert-fecha">${t.exam_psico?.split('—')[0]||'—'}</div>
+          <span class="cert-estado ${psicoEst.cls}">${psicoEst.label}</span>
+        </div>
+        <div class="cert-row">
+          <div class="cert-icon">🩺</div>
+          <div class="cert-nombre">Examen Físico / Médico</div>
+          <div class="cert-fecha">${t.exam_fisico?.split('—')[0]||'—'}</div>
+          <span class="cert-estado ${fisicoEst.cls}">${fisicoEst.label}</span>
+        </div>
+      </div>
+
+      <div class="ficha-sec">
+        <div class="ficha-sec-t">Tallas de Equipamiento</div>
+        <div class="ficha-grid">
+          ${fi('Talla Polera', t.talla_polera||'—')}
+          ${fi('Talla Pantalón', t.talla_pantalon||'—')}
+          ${fi('Talla Polar', t.talla_polar||'—')}
+          ${fi('Talla Zapato', t.talla_zapato||'—')}
+        </div>
+      </div>
+
+      <div style="margin-top:.75rem;font-size:.75rem;color:var(--pk-muted);padding:.5rem;
+                  background:rgba(63,185,80,.04);border-left:2px solid var(--accent)">
+        Vista de solo lectura. Para modificaciones contacta a Recursos Humanos.
+      </div>
+    </div>`;
+}
+
+function fi(label, val) {
+  return `<div>
+    <div class="fi-label">${label}</div>
+    <div class="fi-val">${val||'—'}</div>
+  </div>`;
+}
+
+// ── CERTIFICADOS ───────────────────────────────────────
+function renderCertificados() {
+  const filtroInst = document.getElementById('filter-cert-inst')?.value || '';
+  const lista = filtroInst
+    ? misTrabajadores.filter(t => (t.cliente||t.cliente_instalacion||t.instalacion||'') === filtroInst)
+    : misTrabajadores;
+
+  const hoy = new Date(); hoy.setHours(0,0,0,0);
+  const cont = document.getElementById('cert-contenido');
+
+  if (!lista.length) {
+    cont.innerHTML = '<div style="color:var(--pk-muted);font-size:.85rem">Sin trabajadores.</div>';
+    return;
+  }
+
+  // Separar en grupos
+  const vencidos = [];
+  const porVencer30 = [];
+  const porVencer60 = [];
+  const vigentes = [];
+
+  lista.forEach(t => {
+    if (t.os10_venc) {
+      const dias = Math.floor((new Date(t.os10_venc) - hoy)/(1000*60*60*24));
+      if (dias < 0) vencidos.push({ ...t, cert:'OS-10', dias });
+      else if (dias <= 30) porVencer30.push({ ...t, cert:'OS-10', dias });
+      else if (dias <= 60) porVencer60.push({ ...t, cert:'OS-10', dias });
+      else vigentes.push({ ...t, cert:'OS-10', dias });
+    }
+  });
+
+  const bloque = (titulo, color, items) => {
+    if (!items.length) return '';
+    return `
+      <div style="margin-bottom:1.5rem">
+        <div style="font-family:var(--font-head);font-size:.78rem;font-weight:600;letter-spacing:.12em;
+                    color:${color};text-transform:uppercase;margin-bottom:.75rem;display:flex;align-items:center;gap:8px">
+          ${titulo} (${items.length})
+          <span style="flex:1;height:1px;background:var(--pk-border);display:block"></span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Trabajador</th><th>RUT</th><th>Instalación</th><th>Certificado</th><th>Vencimiento</th><th>Estado</th><th></th></tr></thead>
+            <tbody>
+              ${items.map(t => `<tr>
+                <td>${t.nombre}</td>
+                <td style="font-family:var(--font-mono);font-size:.78rem">${t.rut}</td>
+                <td style="font-size:.78rem">${t.cliente||t.cliente_instalacion||t.instalacion||'—'}</td>
+                <td><span style="font-family:var(--font-head);font-size:.72rem;color:var(--pk-gold)">${t.cert}</span></td>
+                <td style="font-family:var(--font-mono);font-size:.78rem;color:${color}">${t.os10_venc||'—'}</td>
+                <td><span class="cert-estado ${t.dias<0?'cert-vencido':t.dias<=30?'cert-vencer':'cert-vigente'}">${t.dias<0?'VENCIDO':t.dias+' días'}</span></td>
+                <td><button class="btn btn-secondary" style="padding:3px 8px;font-size:.68rem" onclick="verFicha('${t.ref}')">Ver</button></td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>`;
+  };
+
+  cont.innerHTML =
+    bloque('🔴 Vencidos — Acción Inmediata', 'var(--pk-red)', vencidos) +
+    bloque('🟠 Vencen en 30 días', 'var(--pk-orange)', porVencer30) +
+    bloque('🟡 Vencen en 31-60 días', 'var(--pk-gold)', porVencer60) +
+    bloque('✅ Vigentes', 'var(--pk-green)', vigentes) ||
+    '<div style="color:var(--pk-green);font-size:.85rem">✓ Todos los certificados están vigentes.</div>';
+}
+
+// ── HELPERS ────────────────────────────────────────────
+function openModal(id)  { document.getElementById(id).classList.add('show'); }
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.className = 'toast show';
+  clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+function irAPantallaPrincipal() {
+  const user = JSON.parse(sessionStorage.getItem('pk_user') || 'null');
+  if (!user) { window.location.href = 'pk_login.html'; return; }
+  const PERFILES = {
+    'RRHH':                  'pk_rrhh.html',
+    'Prevención de Riesgos': 'pk_prevencion.html',
+    'Gerencia Operaciones':  'pk_gerencia.html',
+    'Gerencia General':      'pk_gerencia.html',
+    'Supervisor':            'pk_supervisor.html',
+  };
+  window.location.href = PERFILES[user.perfil] || 'pk_login.html';
+}
+
+</script>
+</body>
+</html>

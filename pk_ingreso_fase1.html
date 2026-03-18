@@ -1,0 +1,2108 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PK SpA — Ficha de Ingreso de Personal</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --pk-black: #0a0c0f;
+    --pk-dark: #111418;
+    --pk-panel: #161b22;
+    --pk-border: #21262d;
+    --pk-border-light: #30363d;
+    --pk-gold: #c9a84c;
+    --pk-gold-dim: #8a6f30;
+    --pk-gold-glow: rgba(201,168,76,0.15);
+    --pk-red: #d9534f;
+    --pk-green: #3fb950;
+    --pk-text: #e6edf3;
+    --pk-muted: #7d8590;
+    --pk-input-bg: #0d1117;
+    --font-head: 'Rajdhani', sans-serif;
+    --font-body: 'Source Sans 3', sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--pk-black);
+    color: var(--pk-text);
+    font-family: var(--font-body);
+    font-size: 15px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* Background texture */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(201,168,76,0.03) 40px),
+      repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(201,168,76,0.03) 40px);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── HEADER ── */
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(10,12,15,0.95);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--pk-border);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    height: 64px;
+  }
+
+  .logo-mark {
+    width: 40px;
+    height: 40px;
+    background: var(--pk-gold);
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .logo-mark span {
+    font-family: var(--font-head);
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--pk-black);
+    line-height: 1;
+  }
+
+  .site-title {
+    font-family: var(--font-head);
+    font-size: 1.35rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: var(--pk-text);
+  }
+
+  .site-title span { color: var(--pk-gold); }
+
+  .header-badge {
+    margin-left: auto;
+    font-family: var(--font-head);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    color: var(--pk-gold);
+    border: 1px solid var(--pk-gold-dim);
+    padding: 4px 12px;
+    text-transform: uppercase;
+  }
+
+  /* ── HERO BANNER ── */
+  .hero {
+    position: relative;
+    z-index: 1;
+    background: linear-gradient(135deg, #0d1117 0%, #161b22 50%, #0d1117 100%);
+    border-bottom: 1px solid var(--pk-border);
+    padding: 2.5rem 2rem 2rem;
+    overflow: hidden;
+  }
+
+  .hero::after {
+    content: 'PERSONAL';
+    position: absolute;
+    right: -20px;
+    top: 50%;
+    transform: translateY(-50%) rotate(90deg);
+    font-family: var(--font-head);
+    font-size: 6rem;
+    font-weight: 700;
+    letter-spacing: 0.3em;
+    color: rgba(201,168,76,0.04);
+    pointer-events: none;
+  }
+
+  .hero-inner {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .hero-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-head);
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    color: var(--pk-gold);
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+  }
+
+  .hero-label::before {
+    content: '';
+    display: block;
+    width: 20px;
+    height: 2px;
+    background: var(--pk-gold);
+  }
+
+  .hero h1 {
+    font-family: var(--font-head);
+    font-size: 2.2rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    line-height: 1.1;
+    margin-bottom: 0.5rem;
+  }
+
+  .hero p {
+    color: var(--pk-muted);
+    font-size: 0.9rem;
+    max-width: 580px;
+  }
+
+  /* ── PROGRESS TRACKER ── */
+  .progress-bar {
+    position: relative;
+    z-index: 1;
+    background: var(--pk-panel);
+    border-bottom: 1px solid var(--pk-border);
+    padding: 0 2rem;
+    overflow-x: auto;
+  }
+
+  .steps {
+    max-width: 900px;
+    margin: 0 auto;
+    display: flex;
+    align-items: stretch;
+  }
+
+  .step {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 0;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    white-space: nowrap;
+    min-width: 130px;
+  }
+
+  .step.active { border-bottom-color: var(--pk-gold); }
+  .step.done { border-bottom-color: var(--pk-green); }
+
+  .step-num {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: 2px solid var(--pk-border-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-head);
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--pk-muted);
+    flex-shrink: 0;
+    transition: all 0.2s;
+  }
+
+  .step.active .step-num {
+    border-color: var(--pk-gold);
+    background: var(--pk-gold-glow);
+    color: var(--pk-gold);
+  }
+
+  .step.done .step-num {
+    border-color: var(--pk-green);
+    background: rgba(63,185,80,0.15);
+    color: var(--pk-green);
+  }
+
+  .step.done .step-num::after { content: '✓'; }
+
+  .step-label {
+    font-family: var(--font-head);
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    color: var(--pk-muted);
+    text-transform: uppercase;
+  }
+
+  .step.active .step-label { color: var(--pk-gold); }
+  .step.done .step-label { color: var(--pk-green); }
+
+  /* ── MAIN LAYOUT ── */
+  .main {
+    position: relative;
+    z-index: 1;
+    max-width: 900px;
+    margin: 2.5rem auto;
+    padding: 0 2rem 4rem;
+  }
+
+  /* ── SECTION CARD ── */
+  .section-card {
+    background: var(--pk-panel);
+    border: 1px solid var(--pk-border);
+    margin-bottom: 1.5rem;
+    display: none;
+  }
+
+  .section-card.active { display: block; }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--pk-border);
+    background: linear-gradient(90deg, rgba(201,168,76,0.06) 0%, transparent 60%);
+  }
+
+  .section-icon {
+    width: 36px;
+    height: 36px;
+    background: var(--pk-gold-glow);
+    border: 1px solid var(--pk-gold-dim);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+  }
+
+  .section-title {
+    font-family: var(--font-head);
+    font-size: 1.1rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: var(--pk-gold);
+    text-transform: uppercase;
+  }
+
+  .section-subtitle {
+    font-size: 0.8rem;
+    color: var(--pk-muted);
+  }
+
+  .section-required {
+    margin-left: auto;
+    font-size: 0.72rem;
+    color: var(--pk-muted);
+  }
+
+  .section-required span { color: var(--pk-red); }
+
+  .section-body { padding: 1.5rem; }
+
+  /* ── FORM GRID ── */
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+  }
+
+  .form-grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .col-span-2 { grid-column: span 2; }
+  .col-span-3 { grid-column: span 3; }
+  .col-span-full { grid-column: 1 / -1; }
+
+  /* ── FIELD ── */
+  .field { display: flex; flex-direction: column; gap: 6px; }
+
+  .field label {
+    font-family: var(--font-head);
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    color: var(--pk-muted);
+    text-transform: uppercase;
+  }
+
+  .field label .req { color: var(--pk-red); margin-left: 3px; }
+
+  .field input,
+  .field select,
+  .field textarea {
+    background: var(--pk-input-bg);
+    border: 1px solid var(--pk-border-light);
+    color: var(--pk-text);
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    padding: 10px 14px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    width: 100%;
+    -webkit-appearance: none;
+  }
+
+  .field select {
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237d8590' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 36px;
+  }
+
+  .field textarea { resize: vertical; min-height: 80px; }
+
+  .field input:focus,
+  .field select:focus,
+  .field textarea:focus {
+    border-color: var(--pk-gold-dim);
+    box-shadow: 0 0 0 3px var(--pk-gold-glow);
+  }
+
+  .field input.error,
+  .field select.error,
+  .field textarea.error {
+    border-color: var(--pk-red);
+    box-shadow: 0 0 0 3px rgba(217,83,79,0.1);
+  }
+
+  .field input.valid,
+  .field select.valid,
+  .field textarea.valid {
+    border-color: rgba(63,185,80,0.4);
+  }
+
+  .field-error {
+    font-size: 0.75rem;
+    color: var(--pk-red);
+    display: none;
+  }
+
+  .field-error.show { display: block; }
+
+  .field-hint {
+    font-size: 0.75rem;
+    color: var(--pk-muted);
+  }
+
+  /* ── FILE UPLOAD ── */
+  .file-upload {
+    border: 1px dashed var(--pk-border-light);
+    background: var(--pk-input-bg);
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    text-align: center;
+  }
+
+  .file-upload:hover {
+    border-color: var(--pk-gold-dim);
+    background: var(--pk-gold-glow);
+  }
+
+  .file-upload.error { border-color: var(--pk-red); }
+
+  .file-upload input[type="file"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    border: none;
+    background: none;
+  }
+
+  .file-upload .upload-icon { font-size: 1.5rem; }
+
+  .file-upload .upload-label {
+    font-family: var(--font-head);
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: var(--pk-gold);
+    text-transform: uppercase;
+  }
+
+  .file-upload .upload-hint { font-size: 0.75rem; color: var(--pk-muted); }
+
+  .file-list { margin-top: 8px; display: flex; flex-direction: column; gap: 4px; }
+
+  .file-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.8rem;
+    color: var(--pk-green);
+    background: rgba(63,185,80,0.08);
+    border: 1px solid rgba(63,185,80,0.2);
+    padding: 4px 10px;
+  }
+
+  .file-item .remove-file {
+    margin-left: auto;
+    cursor: pointer;
+    color: var(--pk-muted);
+    font-size: 1rem;
+    line-height: 1;
+    background: none;
+    border: none;
+    color: var(--pk-red);
+    padding: 0;
+  }
+
+  /* ── RADIO / CHECKBOX GROUP ── */
+  .radio-group, .check-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .radio-option, .check-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border: 1px solid var(--pk-border-light);
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.88rem;
+  }
+
+  .radio-option:hover, .check-option:hover {
+    border-color: var(--pk-gold-dim);
+    background: var(--pk-gold-glow);
+  }
+
+  .radio-option input, .check-option input { accent-color: var(--pk-gold); }
+
+  /* ── DIVIDER ── */
+  .divider {
+    border: none;
+    border-top: 1px solid var(--pk-border);
+    margin: 1.5rem 0;
+  }
+
+  .subsection-title {
+    font-family: var(--font-head);
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    color: var(--pk-muted);
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .subsection-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--pk-border);
+  }
+
+  /* ── NAV BUTTONS ── */
+  .form-nav {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--pk-border);
+  }
+
+  .btn {
+    font-family: var(--font-head);
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 12px 28px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn-secondary {
+    background: transparent;
+    border: 1px solid var(--pk-border-light);
+    color: var(--pk-muted);
+  }
+
+  .btn-secondary:hover {
+    border-color: var(--pk-gold-dim);
+    color: var(--pk-gold);
+    background: var(--pk-gold-glow);
+  }
+
+  .btn-primary {
+    background: var(--pk-gold);
+    color: var(--pk-black);
+  }
+
+  .btn-primary:hover { background: #e0b85a; }
+
+  .btn-submit {
+    background: var(--pk-green);
+    color: var(--pk-black);
+  }
+
+  .btn-submit:hover { background: #52d467; }
+
+  .btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .nav-progress {
+    margin-left: auto;
+    font-size: 0.8rem;
+    color: var(--pk-muted);
+  }
+
+  /* ── ALERT MESSAGES ── */
+  .alert {
+    padding: 12px 16px;
+    border-left: 3px solid;
+    font-size: 0.88rem;
+    margin-bottom: 1rem;
+    display: none;
+  }
+
+  .alert.show { display: block; }
+  .alert-error { border-color: var(--pk-red); background: rgba(217,83,79,0.08); color: #f85149; }
+  .alert-success { border-color: var(--pk-green); background: rgba(63,185,80,0.08); color: var(--pk-green); }
+  .alert-info { border-color: var(--pk-gold); background: var(--pk-gold-glow); color: var(--pk-gold); }
+
+  /* ── MODAL LOADING ── */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.8);
+    z-index: 500;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+  }
+
+  .modal-overlay.show { display: flex; }
+
+  .modal-box {
+    background: var(--pk-panel);
+    border: 1px solid var(--pk-border);
+    padding: 3rem;
+    text-align: center;
+    max-width: 400px;
+    width: 90%;
+  }
+
+  .spinner {
+    width: 48px;
+    height: 48px;
+    border: 3px solid var(--pk-border-light);
+    border-top-color: var(--pk-gold);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 1.5rem;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .modal-title {
+    font-family: var(--font-head);
+    font-size: 1.1rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: var(--pk-gold);
+    margin-bottom: 0.5rem;
+  }
+
+  .modal-sub { font-size: 0.85rem; color: var(--pk-muted); }
+
+  /* ── SUCCESS STATE ── */
+  .success-screen {
+    display: none;
+    text-align: center;
+    padding: 4rem 2rem;
+    background: var(--pk-panel);
+    border: 1px solid var(--pk-border);
+  }
+
+  .success-screen.show { display: block; }
+
+  .success-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: rgba(63,185,80,0.15);
+    border: 2px solid var(--pk-green);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    margin: 0 auto 1.5rem;
+  }
+
+  .success-title {
+    font-family: var(--font-head);
+    font-size: 1.8rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: var(--pk-green);
+    margin-bottom: 0.75rem;
+  }
+
+  .success-body {
+    color: var(--pk-muted);
+    max-width: 480px;
+    margin: 0 auto 1.5rem;
+    line-height: 1.7;
+  }
+
+  .success-ref {
+    display: inline-block;
+    font-family: var(--font-head);
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    color: var(--pk-gold);
+    border: 1px solid var(--pk-gold-dim);
+    padding: 8px 20px;
+    margin-bottom: 1.5rem;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 640px) {
+    .form-grid { grid-template-columns: 1fr; }
+    .form-grid.cols-3 { grid-template-columns: 1fr; }
+    .col-span-2, .col-span-3 { grid-column: span 1; }
+    .hero h1 { font-size: 1.6rem; }
+    .steps { gap: 0; }
+    .step-label { font-size: 0.7rem; }
+    .site-title { font-size: 1rem; }
+  }
+
+  /* ── TOOLTIP ── */
+  .tooltip-wrap { position: relative; display: inline-block; }
+  .tooltip-icon {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--pk-border-light);
+    color: var(--pk-muted);
+    font-size: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: help;
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+
+  /* ── COUNTER BADGE ── */
+  .field-counter {
+    font-size: 0.72rem;
+    color: var(--pk-muted);
+    text-align: right;
+  }
+
+  /* RUT input style */
+  .rut-verified {
+    display: inline-block;
+    font-size: 0.72rem;
+    color: var(--pk-green);
+    margin-top: 2px;
+    display: none;
+  }
+
+  .rut-verified.show { display: block; }
+
+  /* Info banner */
+  .info-banner {
+    background: linear-gradient(90deg, rgba(201,168,76,0.08), transparent);
+    border: 1px solid var(--pk-border);
+    border-left: 3px solid var(--pk-gold);
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.5rem;
+    font-size: 0.85rem;
+    color: var(--pk-muted);
+    line-height: 1.6;
+  }
+
+  .info-banner strong { color: var(--pk-gold); }
+
+  /* Section summary for review */
+  .review-section { margin-bottom: 1.5rem; }
+  .review-section h3 {
+    font-family: var(--font-head);
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    color: var(--pk-gold);
+    text-transform: uppercase;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--pk-border);
+    margin-bottom: 12px;
+  }
+
+  .review-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .review-item { font-size: 0.85rem; }
+  .review-item .rlabel { color: var(--pk-muted); font-size: 0.75rem; }
+  .review-item .rvalue { color: var(--pk-text); font-weight: 500; }
+  .review-item .rvalue.missing { color: var(--pk-red); font-style: italic; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="site-header">
+  <div class="logo-mark"><span>PK</span></div>
+  <div class="site-title"><span>PK</span> SpA — Sistema RRHH</div>
+  <div class="header-badge">Ficha de Ingreso</div>
+</header>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-label">Recursos Humanos</div>
+    <h1>FORMULARIO DE INGRESO<br>DE PERSONAL</h1>
+    <p>Complete todos los campos obligatorios y adjunte la documentación requerida. El formulario no podrá enviarse con información incompleta.</p>
+  </div>
+</div>
+
+<!-- PROGRESS -->
+<div class="progress-bar">
+  <div class="steps">
+    <div class="step active" data-step="1" onclick="goToStep(1)">
+      <div class="step-num">1</div>
+      <div class="step-label">Datos Personales</div>
+    </div>
+    <div class="step" data-step="2" onclick="goToStep(2)">
+      <div class="step-num">2</div>
+      <div class="step-label">Antecedentes</div>
+    </div>
+    <div class="step" data-step="3" onclick="goToStep(3)">
+      <div class="step-label">Cuenta Bancaria</div>
+      <div class="step-num">3</div>
+    </div>
+    <div class="step" data-step="4" onclick="goToStep(4)">
+      <div class="step-num">4</div>
+      <div class="step-label">Estudios / Cursos</div>
+    </div>
+    <div class="step" data-step="5" onclick="goToStep(5)">
+      <div class="step-num">5</div>
+      <div class="step-label">Documentación</div>
+    </div>
+    <div class="step" data-step="6" onclick="goToStep(6)">
+      <div class="step-num">6</div>
+      <div class="step-label">Revisión</div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN FORM -->
+<main class="main">
+
+  <div id="alert-global" class="alert alert-error">Complete todos los campos obligatorios antes de continuar.</div>
+
+  <!-- ══════════════ PASO 1: DATOS PERSONALES ══════════════ -->
+  <div class="section-card active" id="step-1">
+
+    <div class="section-header">
+      <div class="section-icon">👤</div>
+      <div>
+        <div class="section-title">Datos Personales</div>
+        <div class="section-subtitle">Información de identificación del trabajador</div>
+      </div>
+      <div class="section-required"><span>*</span> Campos obligatorios</div>
+    </div>
+
+    <div class="section-body">
+      <div class="info-banner">
+        <strong>Importante:</strong> Ingrese sus datos exactamente como aparecen en su cédula de identidad vigente. La información será verificada por Recursos Humanos.
+      </div>
+
+      <div class="form-grid">
+        <div class="field">
+          <label>Nombres <span class="req">*</span></label>
+          <input type="text" id="nombres" placeholder="Ej: Juan Carlos" oninput="validateField(this,'text')">
+          <span class="field-error" id="err-nombres">Ingrese sus nombres</span>
+        </div>
+        <div class="field">
+          <label>Apellido Paterno <span class="req">*</span></label>
+          <input type="text" id="ap_paterno" placeholder="Ej: González" oninput="validateField(this,'text')">
+          <span class="field-error" id="err-ap_paterno">Ingrese su apellido paterno</span>
+        </div>
+        <div class="field">
+          <label>Apellido Materno <span class="req">*</span></label>
+          <input type="text" id="ap_materno" placeholder="Ej: Pérez" oninput="validateField(this,'text')">
+          <span class="field-error" id="err-ap_materno">Ingrese su apellido materno</span>
+        </div>
+        <div class="field">
+          <label>RUT <span class="req">*</span></label>
+          <input type="text" id="rut" placeholder="Ej: 12.345.678-9" oninput="formatRut(this)" maxlength="12">
+          <span class="field-error" id="err-rut">RUT inválido</span>
+          <span class="rut-verified" id="rut-ok">✓ RUT verificado</span>
+        </div>
+        <div class="field">
+          <label>Fecha de Nacimiento <span class="req">*</span></label>
+          <input type="date" id="fecha_nac" onchange="validateField(this,'date'); calcEdad()">
+          <span class="field-error" id="err-fecha_nac">Ingrese su fecha de nacimiento</span>
+          <span class="field-hint" id="edad-display"></span>
+        </div>
+        <div class="field">
+          <label>Género <span class="req">*</span></label>
+          <select id="genero" onchange="validateField(this,'select')">
+            <option value="">— Seleccione —</option>
+            <option>Masculino</option>
+            <option>Femenino</option>
+            <option>Otro</option>
+            <option>Prefiero no indicar</option>
+          </select>
+          <span class="field-error" id="err-genero">Seleccione una opción</span>
+        </div>
+        <div class="field">
+          <label>Estado Civil <span class="req">*</span></label>
+          <select id="estado_civil" onchange="validateField(this,'select')">
+            <option value="">— Seleccione —</option>
+            <option>Soltero/a</option>
+            <option>Casado/a</option>
+            <option>Conviviente Civil</option>
+            <option>Divorciado/a</option>
+            <option>Viudo/a</option>
+            <option>Separado/a</option>
+          </select>
+          <span class="field-error" id="err-estado_civil">Seleccione su estado civil</span>
+        </div>
+        <div class="field">
+          <label>Nacionalidad <span class="req">*</span></label>
+          <select id="nacionalidad" onchange="validateField(this,'select')">
+            <option value="">— Seleccione —</option>
+            <option>Chilena</option>
+            <option>Argentina</option>
+            <option>Boliviana</option>
+            <option>Colombiana</option>
+            <option>Ecuatoriana</option>
+            <option>Haitiana</option>
+            <option>Peruana</option>
+            <option>Venezolana</option>
+            <option>Otra</option>
+          </select>
+          <span class="field-error" id="err-nacionalidad">Seleccione su nacionalidad</span>
+        </div>
+        <div class="field col-span-2">
+          <label>Dirección (Calle y Número) <span class="req">*</span></label>
+          <input type="text" id="direccion" placeholder="Ej: Av. Los Leones 1234, Dpto 5B" oninput="validateField(this,'text')">
+          <span class="field-error" id="err-direccion">Ingrese su dirección</span>
+        </div>
+        <div class="field">
+          <label>Comuna <span class="req">*</span></label>
+          <input type="text" id="comuna" placeholder="Ej: Providencia" oninput="validateField(this,'text')">
+          <span class="field-error" id="err-comuna">Ingrese su comuna</span>
+        </div>
+        <div class="field">
+          <label>Región <span class="req">*</span></label>
+          <select id="region" onchange="validateField(this,'select')">
+            <option value="">— Seleccione —</option>
+            <option>Región Metropolitana</option>
+            <option>Región de Valparaíso</option>
+            <option>Región de O'Higgins</option>
+            <option>Región del Maule</option>
+            <option>Región del Biobío</option>
+            <option>Región de La Araucanía</option>
+            <option>Región de Los Lagos</option>
+            <option>Región de Los Ríos</option>
+            <option>Región de Aysén</option>
+            <option>Región de Magallanes</option>
+            <option>Región de Tarapacá</option>
+            <option>Región de Antofagasta</option>
+            <option>Región de Atacama</option>
+            <option>Región de Coquimbo</option>
+            <option>Región del Ñuble</option>
+            <option>Región de Arica y Parinacota</option>
+          </select>
+          <span class="field-error" id="err-region">Seleccione su región</span>
+        </div>
+        <div class="field">
+          <label>Teléfono Móvil <span class="req">*</span></label>
+          <input type="tel" id="telefono" placeholder="+56 9 1234 5678" oninput="validateField(this,'phone')">
+          <span class="field-error" id="err-telefono">Ingrese un teléfono válido</span>
+        </div>
+        <div class="field">
+          <label>Correo Electrónico <span class="req">*</span></label>
+          <input type="email" id="email" placeholder="nombre@correo.cl" oninput="validateField(this,'email')">
+          <span class="field-error" id="err-email">Ingrese un email válido</span>
+        </div>
+      </div>
+
+      <hr class="divider">
+      <div class="subsection-title">Contacto de Emergencia</div>
+
+      <div class="form-grid">
+        <div class="field">
+          <label>Nombre Contacto <span class="req">*</span></label>
+          <input type="text" id="emerg_nombre" placeholder="Nombre completo" oninput="validateField(this,'text')">
+          <span class="field-error" id="err-emerg_nombre">Ingrese nombre del contacto</span>
+        </div>
+        <div class="field">
+          <label>Relación <span class="req">*</span></label>
+          <select id="emerg_relacion" onchange="validateField(this,'select')">
+            <option value="">— Seleccione —</option>
+            <option>Cónyuge / Pareja</option>
+            <option>Madre / Padre</option>
+            <option>Hijo/a</option>
+            <option>Hermano/a</option>
+            <option>Otro familiar</option>
+            <option>Amigo/a</option>
+          </select>
+          <span class="field-error" id="err-emerg_relacion">Seleccione la relación</span>
+        </div>
+        <div class="field">
+          <label>Teléfono Contacto <span class="req">*</span></label>
+          <input type="tel" id="emerg_tel" placeholder="+56 9 1234 5678" oninput="validateField(this,'phone')">
+          <span class="field-error" id="err-emerg_tel">Ingrese un teléfono válido</span>
+        </div>
+        <div class="field">
+          <label>Email Contacto</label>
+          <input type="email" id="emerg_email" placeholder="Opcional" oninput="validateField(this,'email_optional')">
+        </div>
+      </div>
+
+      <hr class="divider">
+      <div class="subsection-title">Carga Familiar</div>
+
+      <div class="form-grid cols-3">
+        <div class="field">
+          <label>N° de Cargas Familiares</label>
+          <input type="number" id="cargas" placeholder="0" min="0" max="20" value="0">
+        </div>
+        <div class="field col-span-2">
+          <label>Detalle (nombres e edades si aplica)</label>
+          <input type="text" id="cargas_detalle" placeholder="Ej: María 5 años, Pedro 8 años">
+        </div>
+      </div>
+
+      <div class="form-nav">
+        <span class="nav-progress">Paso 1 de 6</span>
+        <button class="btn btn-primary" onclick="nextStep(1)">Siguiente ›</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════ PASO 2: ANTECEDENTES LABORALES ══════════════ -->
+  <div class="section-card" id="step-2">
+
+    <div class="section-header">
+      <div class="section-icon">📋</div>
+      <div>
+        <div class="section-title">Antecedentes Laborales y Previsionales</div>
+        <div class="section-subtitle">Información de seguridad, previsión y salud</div>
+      </div>
+    </div>
+
+    <div class="section-body">
+
+      <div class="subsection-title">Antecedentes OS-10</div>
+      <div class="form-grid">
+        <div class="field">
+          <label>N° Credencial OS-10 <span class="req">*</span></label>
+          <input type="text" id="os10_num" placeholder="Ej: OS10-123456" oninput="validateField(this,'text')">
+          <span class="field-error" id="err-os10_num">Ingrese su número de credencial OS-10</span>
+        </div>
+        <div class="field">
+          <label>Fecha Vencimiento Credencial <span class="req">*</span></label>
+          <input type="date" id="os10_venc" onchange="validateField(this,'date_future')">
+          <span class="field-error" id="err-os10_venc">Ingrese la fecha de vencimiento</span>
+        </div>
+        <div class="field">
+          <label>Categoría OS-10 <span class="req">*</span></label>
+          <select id="os10_cat" onchange="validateField(this,'select')">
+            <option value="">— Seleccione —</option>
+            <option>OS-10 Categoría A — Guarda de Seguridad</option>
+            <option>OS-10 Categoría B — Vigilante Privado</option>
+            <option>OS-10 Categoría C — Supervisor de Seguridad</option>
+            <option>OS-10 Categoría D — Jefe de Seguridad</option>
+          </select>
+          <span class="field-error" id="err-os10_cat">Seleccione categoría</span>
+        </div>
+        <div class="field">
+          <label>Licencia de Conducir</label>
+          <select id="licencia">
+            <option value="">— No posee —</option>
+            <option>Clase B</option>
+            <option>Clase C</option>
+            <option>Clase D</option>
+            <option>Clase A1</option>
+            <option>Clase A2</option>
+            <option>Clase A3</option>
+            <option>Clase A4</option>
+          </select>
+        </div>
+      </div>
+
+      <hr class="divider">
+      <div class="subsection-title">Previsión y Salud</div>
+
+      <div class="form-grid">
+        <div class="field">
+          <label>AFP <span class="req">*</span></label>
+          <select id="afp" onchange="validateField(this,'select'); togglePrevision(this)">
+            <option value="">— Seleccione —</option>
+            <optgroup label="── AFP (Sistema Civil) ──">
+              <option>AFP Capital</option>
+              <option>AFP Cuprum</option>
+              <option>AFP Habitat</option>
+              <option>AFP PlanVital</option>
+              <option>AFP Provida</option>
+              <option>AFP Modelo</option>
+              <option>AFP Uno</option>
+            </optgroup>
+            <optgroup label="── FFAA y Orden ──">
+              <option value="CAPREDENA">CAPREDENA — Fuerzas Armadas (Ejército, Armada, FACh)</option>
+              <option value="DIPRECA">DIPRECA — Carabineros de Chile</option>
+              <option value="PDI_PREV">Caja Previsional PDI</option>
+            </optgroup>
+          </select>
+          <span class="field-error" id="err-afp">Seleccione su sistema previsional</span>
+        </div>
+        <div class="field">
+          <label>Sistema de Salud <span class="req">*</span></label>
+          <select id="salud" onchange="toggleIsapre(this)">
+            <option value="">— Seleccione —</option>
+            <optgroup label="── Sistema Civil ──">
+              <option value="FONASA A">FONASA Tramo A</option>
+              <option value="FONASA B">FONASA Tramo B</option>
+              <option value="FONASA C">FONASA Tramo C</option>
+              <option value="FONASA D">FONASA Tramo D</option>
+              <option value="ISAPRE">ISAPRE</option>
+            </optgroup>
+            <optgroup label="── FFAA y Orden ──">
+              <option value="CAPREDENA_SALUD">CAPREDENA — FF.AA. (salud institucional)</option>
+              <option value="DIPRECA_SALUD">DIPRECA — Carabineros (salud institucional)</option>
+              <option value="PDI_SALUD">Caja Previsional PDI (salud)</option>
+            </optgroup>
+          </select>
+          <span class="field-error" id="err-salud">Seleccione su sistema de salud</span>
+        </div>
+        <div class="field" id="field-isapre" style="display:none">
+          <label>Nombre ISAPRE <span class="req">*</span></label>
+          <select id="isapre_nombre">
+            <option value="">— Seleccione ISAPRE —</option>
+            <option>Banmédica</option>
+            <option>Colmena Golden Cross</option>
+            <option>Consalud</option>
+            <option>Cruz Blanca</option>
+            <option>Cruz del Norte</option>
+            <option>Esencial</option>
+            <option>MásVida</option>
+            <option>Nueva Masvida</option>
+            <option>Vida Tres</option>
+          </select>
+        </div>
+        <div class="field col-span-2" id="field-ffaa" style="display:none">
+          <div class="form-grid">
+            <div class="field">
+              <label>Rama / Institución de Origen</label>
+              <select id="ffaa_rama">
+                <option value="">— Seleccione —</option>
+                <optgroup label="── Fuerzas Armadas ──">
+                  <option>Ejército de Chile</option>
+                  <option>Armada de Chile</option>
+                  <option>Fuerza Aérea de Chile</option>
+                </optgroup>
+                <optgroup label="── Fuerzas de Orden ──">
+                  <option>Carabineros de Chile</option>
+                  <option>Policía de Investigaciones (PDI)</option>
+                </optgroup>
+              </select>
+            </div>
+            <div class="field">
+              <label>Grado / Rango al Retiro</label>
+              <input type="text" id="ffaa_grado" placeholder="Ej: Sargento 2°, Cabo 1°, Teniente...">
+            </div>
+            <div class="field">
+              <label>Años de Servicio</label>
+              <input type="number" id="ffaa_anios" placeholder="Ej: 20" min="1" max="45">
+            </div>
+            <div class="field">
+              <label>Año de Retiro</label>
+              <input type="number" id="ffaa_retiro" placeholder="Ej: 2022" min="1970" max="2025">
+            </div>
+          </div>
+          <div class="alert alert-info show" style="margin-top:0.75rem;font-size:0.82rem;">
+            ℹ El personal retirado de FF.AA. y Carabineros mantiene su sistema previsional institucional
+            (CAPREDENA / DIPRECA). No cotiza en AFP civil. El empleador igualmente debe descontar y enterar
+            los aportes según la normativa vigente para este tipo de trabajadores.
+          </div>
+        </div>
+        <div class="field">
+          <label>Mutual de Seguridad <span class="req">*</span></label>
+          <select id="mutual" onchange="validateField(this,'select')">
+            <option value="">— Seleccione —</option>
+            <option>ACHS — Asociación Chilena de Seguridad</option>
+            <option>IST — Instituto de Seguridad del Trabajo</option>
+            <option>Mutual de Seguridad CChC</option>
+            <option>INP / Instituto de Normalización Previsional</option>
+          </select>
+          <span class="field-error" id="err-mutual">Seleccione su mutual</span>
+        </div>
+      </div>
+
+      <hr class="divider">
+      <div class="subsection-title">Antecedentes Comerciales y Penales</div>
+
+      <div class="form-grid">
+        <div class="field">
+          <label>Antecedentes Comerciales <span class="req">*</span></label>
+          <select id="antec_com" onchange="validateField(this,'select')">
+            <option value="">— Seleccione —</option>
+            <option>Sin antecedentes</option>
+            <option>Con antecedentes (en proceso de regularización)</option>
+            <option>Con antecedentes regularizados</option>
+          </select>
+          <span class="field-error" id="err-antec_com">Seleccione una opción</span>
+        </div>
+        <div class="field">
+          <label>Antecedentes Penales <span class="req">*</span></label>
+          <select id="antec_pen" onchange="validateField(this,'select')">
+            <option value="">— Seleccione —</option>
+            <option>Sin antecedentes</option>
+            <option>Con antecedentes (con cumplimiento)</option>
+          </select>
+          <span class="field-error" id="err-antec_pen">Seleccione una opción</span>
+        </div>
+      </div>
+
+      <hr class="divider">
+      <div class="subsection-title">Exámenes Médicos</div>
+
+      <div class="form-grid">
+        <div class="field">
+          <label>Examen Psicológico <span class="req">*</span></label>
+          <select id="exam_psico" onchange="validateField(this,'select')">
+            <option value="">— Seleccione —</option>
+            <option>Aprobado — Vigente</option>
+            <option>Aprobado — Por renovar</option>
+            <option>Pendiente</option>
+          </select>
+          <span class="field-error" id="err-exam_psico">Seleccione estado del examen</span>
+        </div>
+        <div class="field">
+          <label>Fecha Examen Psicológico</label>
+          <input type="date" id="fecha_psico">
+        </div>
+        <div class="field">
+          <label>Examen Físico (COMPIN/Médico) <span class="req">*</span></label>
+          <select id="exam_fisico" onchange="validateField(this,'select')">
+            <option value="">— Seleccione —</option>
+            <option>Aprobado — Vigente</option>
+            <option>Aprobado — Por renovar</option>
+            <option>Pendiente</option>
+          </select>
+          <span class="field-error" id="err-exam_fisico">Seleccione estado del examen</span>
+        </div>
+        <div class="field">
+          <label>Fecha Examen Físico</label>
+          <input type="date" id="fecha_fisico">
+        </div>
+        <div class="field">
+          <label>Grupo Sanguíneo</label>
+          <select id="grupo_sg">
+            <option value="">— No sabe / No indica —</option>
+            <option>A+</option><option>A-</option>
+            <option>B+</option><option>B-</option>
+            <option>AB+</option><option>AB-</option>
+            <option>O+</option><option>O-</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Alergias o Condiciones Médicas Relevantes</label>
+          <input type="text" id="alergias" placeholder="Ej: Alérgico a penicilina (opcional)">
+        </div>
+      </div>
+
+      <div class="form-nav">
+        <button class="btn btn-secondary" onclick="prevStep(2)">‹ Anterior</button>
+        <span class="nav-progress">Paso 2 de 6</span>
+        <button class="btn btn-primary" onclick="nextStep(2)">Siguiente ›</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════ PASO 3: CUENTA BANCARIA ══════════════ -->
+  <div class="section-card" id="step-3">
+
+    <div class="section-header">
+      <div class="section-icon">🏦</div>
+      <div>
+        <div class="section-title">Cuenta Bancaria para Remuneraciones</div>
+        <div class="section-subtitle">Datos para el pago mensual de sueldo</div>
+      </div>
+    </div>
+
+    <div class="section-body">
+
+      <div class="info-banner">
+        <strong>Nota:</strong> La cuenta debe estar a nombre del trabajador. En caso de no tener cuenta bancaria, indicar en observaciones para gestionar cuenta RUT o similar.
+      </div>
+
+      <div class="form-grid">
+        <div class="field">
+          <label>Banco <span class="req">*</span></label>
+          <select id="banco" onchange="validateField(this,'select')">
+            <option value="">— Seleccione —</option>
+            <option>Banco Estado</option>
+            <option>Banco de Chile</option>
+            <option>Banco BCI</option>
+            <option>Banco Santander</option>
+            <option>Banco Security</option>
+            <option>Banco Itaú</option>
+            <option>Banco BICE</option>
+            <option>Banco Internacional</option>
+            <option>Banco Ripley</option>
+            <option>Banco Falabella</option>
+            <option>Banco Consorcio</option>
+            <option>Scotiabank Chile</option>
+            <option>HSBC Chile</option>
+            <option>Cuenta RUT (Banco Estado)</option>
+            <option>Mercado Pago</option>
+            <option>Otro</option>
+          </select>
+          <span class="field-error" id="err-banco">Seleccione su banco</span>
+        </div>
+        <div class="field">
+          <label>Tipo de Cuenta <span class="req">*</span></label>
+          <select id="tipo_cuenta" onchange="validateField(this,'select')">
+            <option value="">— Seleccione —</option>
+            <option>Cuenta Corriente</option>
+            <option>Cuenta de Ahorro</option>
+            <option>Cuenta Vista</option>
+            <option>Cuenta RUT</option>
+          </select>
+          <span class="field-error" id="err-tipo_cuenta">Seleccione tipo de cuenta</span>
+        </div>
+        <div class="field col-span-2">
+          <label>N° de Cuenta <span class="req">*</span></label>
+          <input type="text" id="num_cuenta" placeholder="Ingrese el número de cuenta" oninput="validateField(this,'text')">
+          <span class="field-error" id="err-num_cuenta">Ingrese su número de cuenta</span>
+        </div>
+        <div class="field col-span-2">
+          <label>Observaciones sobre Pago</label>
+          <input type="text" id="obs_pago" placeholder="Ej: No tengo cuenta, solicito gestión de cuenta RUT">
+        </div>
+      </div>
+
+      <div class="form-nav">
+        <button class="btn btn-secondary" onclick="prevStep(3)">‹ Anterior</button>
+        <span class="nav-progress">Paso 3 de 6</span>
+        <button class="btn btn-primary" onclick="nextStep(3)">Siguiente ›</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════ PASO 4: ESTUDIOS Y CURSOS ══════════════ -->
+  <div class="section-card" id="step-4">
+
+    <div class="section-header">
+      <div class="section-icon">🎓</div>
+      <div>
+        <div class="section-title">Estudios y Capacitaciones</div>
+        <div class="section-subtitle">Nivel educacional, cursos y certificaciones</div>
+      </div>
+    </div>
+
+    <div class="section-body">
+
+      <div class="subsection-title">Nivel Educacional</div>
+      <div class="form-grid">
+        <div class="field">
+          <label>Nivel de Estudios <span class="req">*</span></label>
+          <select id="nivel_estudios" onchange="validateField(this,'select')">
+            <option value="">— Seleccione —</option>
+            <option>Educación Básica Completa</option>
+            <option>Educación Básica Incompleta</option>
+            <option>Educación Media Completa</option>
+            <option>Educación Media Incompleta</option>
+            <option>Técnico Nivel Medio</option>
+            <option>Técnico Nivel Superior (IP)</option>
+            <option>Universitaria Completa</option>
+            <option>Universitaria Incompleta</option>
+            <option>Postgrado</option>
+          </select>
+          <span class="field-error" id="err-nivel_estudios">Seleccione su nivel de estudios</span>
+        </div>
+        <div class="field">
+          <label>Institución Educacional</label>
+          <input type="text" id="institucion" placeholder="Nombre del colegio, instituto o universidad">
+        </div>
+        <div class="field">
+          <label>Año de Egreso / Último Año Cursado</label>
+          <input type="number" id="anio_egreso" placeholder="Ej: 2018" min="1960" max="2025">
+        </div>
+        <div class="field">
+          <label>Título o Especialidad</label>
+          <input type="text" id="titulo" placeholder="Ej: Técnico en Electricidad Industrial">
+        </div>
+      </div>
+
+      <hr class="divider">
+      <div class="subsection-title">Cursos de Seguridad y Capacitaciones</div>
+
+      <div class="form-grid">
+        <div class="field col-span-2">
+          <label>Curso OS-10 (Formación Básica) <span class="req">*</span></label>
+          <select id="curso_os10" onchange="validateField(this,'select')">
+            <option value="">— Seleccione —</option>
+            <option>Aprobado — con certificado vigente</option>
+            <option>Aprobado — certificado por renovar</option>
+            <option>En proceso</option>
+          </select>
+          <span class="field-error" id="err-curso_os10">Indique estado del curso OS-10</span>
+        </div>
+        <div class="field">
+          <label>Curso Primeros Auxilios</label>
+          <select id="curso_pa">
+            <option value="">— No realizado —</option>
+            <option>Básico</option>
+            <option>Avanzado (RCP)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Curso Prevención de Incendios</label>
+          <select id="curso_pi">
+            <option value="">— No realizado —</option>
+            <option>Realizado</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Manejo Defensivo</label>
+          <select id="curso_md">
+            <option value="">— No realizado —</option>
+            <option>Realizado</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Otros Cursos Relevantes</label>
+          <input type="text" id="otros_cursos" placeholder="Ej: Uso de CCTV, Control de acceso, etc.">
+        </div>
+      </div>
+
+      <hr class="divider">
+      <div class="subsection-title">Experiencia Laboral Previa en Seguridad</div>
+
+      <div class="form-grid">
+        <div class="field">
+          <label>Años de Experiencia en Seguridad</label>
+          <select id="exp_seguridad">
+            <option value="0">Sin experiencia previa</option>
+            <option>Menos de 1 año</option>
+            <option>1 a 2 años</option>
+            <option>3 a 5 años</option>
+            <option>Más de 5 años</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Última Empresa donde trabajó</label>
+          <input type="text" id="ultima_empresa" placeholder="Nombre de la empresa (opcional)">
+        </div>
+        <div class="field col-span-2">
+          <label>Observaciones sobre Experiencia</label>
+          <textarea id="obs_experiencia" placeholder="Describa brevemente su experiencia anterior en seguridad privada..."></textarea>
+        </div>
+      </div>
+
+      <div class="form-nav">
+        <button class="btn btn-secondary" onclick="prevStep(4)">‹ Anterior</button>
+        <span class="nav-progress">Paso 4 de 6</span>
+        <button class="btn btn-primary" onclick="nextStep(4)">Siguiente ›</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════ PASO 5: DOCUMENTACIÓN ADJUNTA ══════════════ -->
+  <div class="section-card" id="step-5">
+
+    <div class="section-header">
+      <div class="section-icon">📎</div>
+      <div>
+        <div class="section-title">Documentación Requerida</div>
+        <div class="section-subtitle">Adjunte los documentos obligatorios para la contratación</div>
+      </div>
+    </div>
+
+    <div class="section-body">
+
+      <div class="info-banner">
+        <strong>Formatos aceptados:</strong> PDF, JPG, PNG — Tamaño máximo por archivo: 5 MB. <strong>Todos los documentos marcados con (*) son obligatorios</strong> para enviar el formulario.
+      </div>
+
+      <div class="form-grid">
+
+        <div class="field">
+          <label>Cédula de Identidad (Ambos Lados) <span class="req">*</span></label>
+          <div class="file-upload" id="fu-cedula">
+            <input type="file" id="f-cedula" accept=".pdf,.jpg,.jpeg,.png" multiple onchange="handleFile('cedula', this)">
+            <div class="upload-icon">🪪</div>
+            <div class="upload-label">Seleccionar archivo(s)</div>
+            <div class="upload-hint">PDF o imagen — Máx. 5 MB</div>
+          </div>
+          <div class="file-list" id="fl-cedula"></div>
+          <span class="field-error" id="err-f-cedula">Adjunte su cédula de identidad</span>
+        </div>
+
+        <div class="field">
+          <label>Credencial OS-10 Vigente <span class="req">*</span></label>
+          <div class="file-upload" id="fu-os10">
+            <input type="file" id="f-os10" accept=".pdf,.jpg,.jpeg,.png" onchange="handleFile('os10', this)">
+            <div class="upload-icon">🛡️</div>
+            <div class="upload-label">Seleccionar archivo</div>
+            <div class="upload-hint">PDF o imagen — Máx. 5 MB</div>
+          </div>
+          <div class="file-list" id="fl-os10"></div>
+          <span class="field-error" id="err-f-os10">Adjunte su credencial OS-10</span>
+        </div>
+
+        <div class="field">
+          <label>Certificado de Antecedentes Penales <span class="req">*</span></label>
+          <div class="file-upload" id="fu-antecedentes">
+            <input type="file" id="f-antecedentes" accept=".pdf,.jpg,.jpeg,.png" onchange="handleFile('antecedentes', this)">
+            <div class="upload-icon">📄</div>
+            <div class="upload-label">Seleccionar archivo</div>
+            <div class="upload-hint">Vigencia máx. 90 días — PDF o imagen</div>
+          </div>
+          <div class="file-list" id="fl-antecedentes"></div>
+          <span class="field-error" id="err-f-antecedentes">Adjunte certificado de antecedentes</span>
+        </div>
+
+        <div class="field">
+          <label>Certificado Examen Psicológico <span class="req">*</span></label>
+          <div class="file-upload" id="fu-psicologico">
+            <input type="file" id="f-psicologico" accept=".pdf,.jpg,.jpeg,.png" onchange="handleFile('psicologico', this)">
+            <div class="upload-icon">🧠</div>
+            <div class="upload-label">Seleccionar archivo</div>
+            <div class="upload-hint">PDF o imagen — Máx. 5 MB</div>
+          </div>
+          <div class="file-list" id="fl-psicologico"></div>
+          <span class="field-error" id="err-f-psicologico">Adjunte certificado psicológico</span>
+        </div>
+
+        <div class="field">
+          <label>Certificado Examen Físico / Médico <span class="req">*</span></label>
+          <div class="file-upload" id="fu-fisico">
+            <input type="file" id="f-fisico" accept=".pdf,.jpg,.jpeg,.png" onchange="handleFile('fisico', this)">
+            <div class="upload-icon">🩺</div>
+            <div class="upload-label">Seleccionar archivo</div>
+            <div class="upload-hint">PDF o imagen — Máx. 5 MB</div>
+          </div>
+          <div class="file-list" id="fl-fisico"></div>
+          <span class="field-error" id="err-f-fisico">Adjunte certificado médico</span>
+        </div>
+
+        <div class="field">
+          <label id="lbl-afp">Certificado Previsional (AFP / CAPREDENA / DIPRECA) <span class="req">*</span></label>
+          <div class="file-upload" id="fu-afp">
+            <input type="file" id="f-afp" accept=".pdf,.jpg,.jpeg,.png" onchange="handleFile('afp', this)">
+            <div class="upload-icon">🏛️</div>
+            <div class="upload-label">Seleccionar archivo</div>
+            <div class="upload-hint">PDF o imagen — Máx. 5 MB</div>
+          </div>
+          <div class="file-list" id="fl-afp"></div>
+          <span class="field-error" id="err-f-afp">Adjunte certificado AFP</span>
+        </div>
+
+        <div class="field">
+          <label>Certificado de Estudios</label>
+          <div class="file-upload" id="fu-estudios">
+            <input type="file" id="f-estudios" accept=".pdf,.jpg,.jpeg,.png" onchange="handleFile('estudios', this)">
+            <div class="upload-icon">📚</div>
+            <div class="upload-label">Seleccionar archivo</div>
+            <div class="upload-hint">Opcional — PDF o imagen</div>
+          </div>
+          <div class="file-list" id="fl-estudios"></div>
+        </div>
+
+        <div class="field">
+          <label>Certificado Curso OS-10 <span class="req">*</span></label>
+          <div class="file-upload" id="fu-curso_os10_cert">
+            <input type="file" id="f-curso_os10_cert" accept=".pdf,.jpg,.jpeg,.png" onchange="handleFile('curso_os10_cert', this)">
+            <div class="upload-icon">📜</div>
+            <div class="upload-label">Seleccionar archivo</div>
+            <div class="upload-hint">PDF o imagen — Máx. 5 MB</div>
+          </div>
+          <div class="file-list" id="fl-curso_os10_cert"></div>
+          <span class="field-error" id="err-f-curso_os10_cert">Adjunte certificado del curso OS-10</span>
+        </div>
+
+        <div class="field">
+          <label>Comprobante Cuenta Bancaria</label>
+          <div class="file-upload" id="fu-cuenta_banco">
+            <input type="file" id="f-cuenta_banco" accept=".pdf,.jpg,.jpeg,.png" onchange="handleFile('cuenta_banco', this)">
+            <div class="upload-icon">💳</div>
+            <div class="upload-label">Seleccionar archivo</div>
+            <div class="upload-hint">Opcional — Cartola o comprobante</div>
+          </div>
+          <div class="file-list" id="fl-cuenta_banco"></div>
+        </div>
+
+        <div class="field">
+          <label>Foto Carnet (Fondo Blanco)</label>
+          <div class="file-upload" id="fu-foto">
+            <input type="file" id="f-foto" accept=".jpg,.jpeg,.png" onchange="handleFile('foto', this)">
+            <div class="upload-icon">📷</div>
+            <div class="upload-label">Seleccionar imagen</div>
+            <div class="upload-hint">Opcional — JPG o PNG</div>
+          </div>
+          <div class="file-list" id="fl-foto"></div>
+        </div>
+
+      </div>
+
+      <div class="form-nav">
+        <button class="btn btn-secondary" onclick="prevStep(5)">‹ Anterior</button>
+        <span class="nav-progress">Paso 5 de 6</span>
+        <button class="btn btn-primary" onclick="nextStep(5)">Revisar Formulario ›</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════ PASO 6: REVISIÓN Y ENVÍO ══════════════ -->
+  
+  <!-- ══════════════ PASO 6: REVISIÓN Y ENVÍO ══════════════ -->
+  <div class="section-card" id="step-6">
+
+    <div class="section-header">
+      <div class="section-icon">✅</div>
+      <div>
+        <div class="section-title">Revisión y Envío</div>
+        <div class="section-subtitle">Verifique sus datos antes de enviar</div>
+      </div>
+    </div>
+
+    <div class="section-body">
+
+      <div id="review-content"></div>
+
+      <div class="info-banner" style="margin-top:1.5rem">
+        <strong>Declaración:</strong> Declaro que todos los antecedentes proporcionados son fidedignos y completos. Entiendo que cualquier información falsa puede ser causal de término de contrato.
+      </div>
+
+      <div class="form-nav">
+        <button class="btn btn-secondary" onclick="prevStep(6)">‹ Volver a Documentos</button>
+        <span class="nav-progress">Paso 6 de 6</span>
+        <button class="btn btn-submit" onclick="submitForm()">📤 Enviar Ficha de Ingreso</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUCCESS -->
+  <div class="success-screen" id="success-screen">
+    <div class="success-icon">✓</div>
+    <div class="success-title">¡Ficha Enviada con Éxito!</div>
+    <p class="success-body">
+      Su formulario de ingreso ha sido recibido por el equipo de Recursos Humanos de PK SpA.<br>
+      Se ha enviado una copia a su correo electrónico y a las áreas correspondientes.<br><br>
+      Un ejecutivo de RR.HH. se contactará con usted a la brevedad para continuar el proceso de contratación.
+    </p>
+    <div class="success-ref" id="success-ref">REF: Generando...</div>
+    <br>
+    <button class="btn btn-secondary" onclick="location.reload()">Enviar otro formulario</button>
+  </div>
+
+</main>
+
+<!-- MODAL LOADING -->
+<div class="modal-overlay" id="modal-loading">
+  <div class="modal-box">
+    <div class="spinner"></div>
+    <div class="modal-title">Enviando Formulario</div>
+    <div class="modal-sub" id="modal-sub-text">Enviando datos a Recursos Humanos...</div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+// CONFIGURACIÓN — Reemplazar con URL de Apps Script
+// ══════════════════════════════════════════════
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbzr1LbD5OeV0lEn8jxafJUb1jjSxWyVL9pHMiJDA6NxoybaWLkloG_rxOKLrUBKOpyn/exec';
+// Emails de notificación
+const EMAIL_RRHH    = 'rrhh@pkspaseguridad.cl';
+const EMAIL_GEROPER = 'operaciones@pkspaseguridad.cl';
+const EMAIL_GERGEN  = 'gerencia@pkspaseguridad.cl';
+
+// ══════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════
+let currentStep = 1;
+const totalSteps = 6;
+const uploadedFiles = {};
+
+// ══════════════════════════════════════════════
+// STEP NAVIGATION
+// ══════════════════════════════════════════════
+function goToStep(n) {
+  document.getElementById(`step-${currentStep}`)?.classList.remove('active');
+  document.querySelectorAll('.step').forEach(s => {
+    const sn = parseInt(s.dataset.step);
+    s.classList.remove('active');
+    if (sn < n) s.classList.add('done');
+    else if (sn === n) s.classList.add('active');
+    else s.classList.remove('done');
+  });
+  currentStep = n;
+  document.getElementById(`step-${n}`)?.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  hideAlert();
+  if (n === 6) buildReview();
+}
+
+function nextStep(from) {
+  if (!validateStep(from)) {
+    showAlert('Complete todos los campos obligatorios antes de continuar.');
+    return;
+  }
+  goToStep(from + 1);
+}
+
+function prevStep(from) {
+  goToStep(from - 1);
+}
+
+// ══════════════════════════════════════════════
+// VALIDATION
+// ══════════════════════════════════════════════
+const stepFields = {
+  1: [
+    { id: 'nombres', type: 'text' },
+    { id: 'ap_paterno', type: 'text' },
+    { id: 'ap_materno', type: 'text' },
+    { id: 'rut', type: 'rut' },
+    { id: 'fecha_nac', type: 'date' },
+    { id: 'genero', type: 'select' },
+    { id: 'estado_civil', type: 'select' },
+    { id: 'nacionalidad', type: 'select' },
+    { id: 'direccion', type: 'text' },
+    { id: 'comuna', type: 'text' },
+    { id: 'region', type: 'select' },
+    { id: 'telefono', type: 'phone' },
+    { id: 'email', type: 'email' },
+    { id: 'emerg_nombre', type: 'text' },
+    { id: 'emerg_relacion', type: 'select' },
+    { id: 'emerg_tel', type: 'phone' },
+  ],
+  2: [
+    { id: 'os10_num', type: 'text' },
+    { id: 'os10_venc', type: 'date' },
+    { id: 'os10_cat', type: 'select' },
+    { id: 'afp', type: 'select' },
+    { id: 'salud', type: 'select' },
+    { id: 'mutual', type: 'select' },
+    { id: 'antec_com', type: 'select' },
+    { id: 'antec_pen', type: 'select' },
+    { id: 'exam_psico', type: 'select' },
+    { id: 'exam_fisico', type: 'select' },
+  ],
+  3: [
+    { id: 'banco', type: 'select' },
+    { id: 'tipo_cuenta', type: 'select' },
+    { id: 'num_cuenta', type: 'text' },
+  ],
+  4: [
+    { id: 'nivel_estudios', type: 'select' },
+    { id: 'curso_os10', type: 'select' },
+  ],
+  5: [
+    { id: 'f-cedula', type: 'file' },
+    { id: 'f-os10', type: 'file' },
+    { id: 'f-antecedentes', type: 'file' },
+    { id: 'f-psicologico', type: 'file' },
+    { id: 'f-fisico', type: 'file' },
+    { id: 'f-afp', type: 'file' },
+    { id: 'f-curso_os10_cert', type: 'file' },
+  ]
+};
+
+function validateStep(step) {
+  const fields = stepFields[step] || [];
+  let valid = true;
+  fields.forEach(f => {
+    const ok = validateField(document.getElementById(f.id), f.type);
+    if (!ok) valid = false;
+  });
+  return valid;
+}
+
+function validateField(el, type) {
+  if (!el) return true;
+  const errEl = document.getElementById('err-' + el.id);
+  let valid = false;
+
+  if (type === 'text') {
+    valid = el.value.trim().length > 1;
+  } else if (type === 'email') {
+    valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(el.value.trim());
+  } else if (type === 'email_optional') {
+    valid = el.value.trim() === '' || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(el.value.trim());
+  } else if (type === 'phone') {
+    valid = el.value.replace(/\D/g,'').length >= 8;
+  } else if (type === 'select') {
+    valid = el.value !== '';
+  } else if (type === 'date') {
+    valid = el.value !== '';
+  } else if (type === 'date_future') {
+    valid = el.value !== '';
+  } else if (type === 'rut') {
+    valid = validateRut(el.value);
+  } else if (type === 'file') {
+    const key = el.id.replace('f-', '');
+    valid = uploadedFiles[key] && uploadedFiles[key].length > 0;
+  }
+
+  el.classList.toggle('error', !valid);
+  el.classList.toggle('valid', valid);
+  if (errEl) errEl.classList.toggle('show', !valid);
+  return valid;
+}
+
+// RUT validation (módulo 11)
+function validateRut(rut) {
+  rut = rut.replace(/\./g, '').replace(/-/g, '').toUpperCase();
+  if (rut.length < 2) return false;
+  const body = rut.slice(0, -1);
+  const dv = rut.slice(-1);
+  if (!/^\d+$/.test(body)) return false;
+  let sum = 0, mul = 2;
+  for (let i = body.length - 1; i >= 0; i--) {
+    sum += parseInt(body[i]) * mul;
+    mul = mul === 7 ? 2 : mul + 1;
+  }
+  const expected = 11 - (sum % 11);
+  let calc = expected === 11 ? '0' : expected === 10 ? 'K' : String(expected);
+  return dv === calc;
+}
+
+function formatRut(el) {
+  let v = el.value.replace(/[^0-9kK]/g, '').toUpperCase();
+  if (v.length > 1) {
+    const body = v.slice(0, -1).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    v = body + '-' + v.slice(-1);
+  }
+  el.value = v;
+  const ok = validateRut(el.value);
+  const okEl = document.getElementById('rut-ok');
+  okEl.classList.toggle('show', ok);
+  const errEl = document.getElementById('err-rut');
+  el.classList.toggle('error', !ok && v.length > 3);
+  el.classList.toggle('valid', ok);
+  if (errEl) errEl.classList.toggle('show', !ok && v.length > 3);
+}
+
+function calcEdad() {
+  const v = document.getElementById('fecha_nac').value;
+  if (!v) return;
+  const hoy = new Date();
+  const nac = new Date(v);
+  let edad = hoy.getFullYear() - nac.getFullYear();
+  const m = hoy.getMonth() - nac.getMonth();
+  if (m < 0 || (m === 0 && hoy.getDate() < nac.getDate())) edad--;
+  document.getElementById('edad-display').textContent = edad >= 0 ? `Edad: ${edad} años` : '';
+}
+
+function toggleIsapre(sel) {
+  const isapre = document.getElementById('field-isapre');
+  const ffaa   = document.getElementById('field-ffaa');
+  const esFFAA = ['CAPREDENA_SALUD','DIPRECA_SALUD','PDI_SALUD'].includes(sel.value);
+  isapre.style.display = sel.value === 'ISAPRE' ? '' : 'none';
+  ffaa.style.display   = esFFAA ? '' : 'none';
+  // Ajustar label del certificado AFP según sistema
+  const labelAfpDoc = document.querySelector('[for="f-afp"]') || document.querySelector('label[id="lbl-afp"]');
+  validateField(sel, 'select');
+}
+
+function togglePrevision(sel) {
+  // Si elige CAPREDENA o DIPRECA, cambiar el label del documento AFP
+  // y mostrar campo de institución FFAA si aún no está visible
+  const esFFAA = ['CAPREDENA','DIPRECA','PDI_PREV'].includes(sel.value);
+  const ffaa   = document.getElementById('field-ffaa');
+  if (ffaa) ffaa.style.display = esFFAA ? '' : 'none';
+  // Actualizar hint del documento previsional en paso 5
+  const hintAfp = document.querySelector('#fu-afp .upload-hint');
+  if (hintAfp) {
+    if (sel.value === 'CAPREDENA') hintAfp.textContent = 'Certificado CAPREDENA — PDF o imagen';
+    else if (sel.value === 'DIPRECA') hintAfp.textContent = 'Certificado DIPRECA — PDF o imagen';
+    else if (sel.value === 'PDI_PREV') hintAfp.textContent = 'Certificado Caja PDI — PDF o imagen';
+    else hintAfp.textContent = 'PDF o imagen — Máx. 5 MB';
+  }
+  validateField(sel, 'select');
+}
+
+// ══════════════════════════════════════════════
+// FILE HANDLING
+// ══════════════════════════════════════════════
+function handleFile(key, input) {
+  if (!uploadedFiles[key]) uploadedFiles[key] = [];
+  const maxSize = 5 * 1024 * 1024;
+  Array.from(input.files).forEach(file => {
+    if (file.size > maxSize) {
+      showAlert(`El archivo "${file.name}" supera el límite de 5 MB.`);
+      return;
+    }
+    uploadedFiles[key].push(file);
+  });
+  renderFileList(key);
+  const errEl = document.getElementById('err-f-' + key);
+  const fuEl = document.getElementById('fu-' + key);
+  const hasFile = uploadedFiles[key].length > 0;
+  if (errEl) errEl.classList.toggle('show', !hasFile);
+  if (fuEl) fuEl.classList.toggle('error', !hasFile);
+}
+
+function renderFileList(key) {
+  const container = document.getElementById('fl-' + key);
+  if (!container) return;
+  container.innerHTML = '';
+  (uploadedFiles[key] || []).forEach((f, i) => {
+    const div = document.createElement('div');
+    div.className = 'file-item';
+    div.innerHTML = `📎 ${f.name} <small>(${(f.size/1024).toFixed(0)} KB)</small>
+      <button class="remove-file" onclick="removeFile('${key}',${i})">✕</button>`;
+    container.appendChild(div);
+  });
+}
+
+function removeFile(key, idx) {
+  uploadedFiles[key].splice(idx, 1);
+  renderFileList(key);
+}
+
+// ══════════════════════════════════════════════
+// ALERTS
+// ══════════════════════════════════════════════
+function showAlert(msg) {
+  const el = document.getElementById('alert-global');
+  el.textContent = msg;
+  el.classList.add('show');
+  el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function hideAlert() {
+  document.getElementById('alert-global').classList.remove('show');
+}
+
+// ══════════════════════════════════════════════
+// REVIEW BUILDER
+// ══════════════════════════════════════════════
+function buildReview() {
+  const g = id => {
+    const el = document.getElementById(id);
+    return el ? (el.value || '—') : '—';
+  };
+
+  const docNames = {
+    cedula: 'Cédula de Identidad',
+    os10: 'Credencial OS-10',
+    antecedentes: 'Cert. Antecedentes',
+    psicologico: 'Examen Psicológico',
+    fisico: 'Examen Físico',
+    afp: 'Cert. AFP',
+    curso_os10_cert: 'Cert. Curso OS-10',
+  };
+
+  const docStatus = Object.entries(docNames).map(([k, label]) => {
+    const files = uploadedFiles[k] || [];
+    return `<div class="review-item">
+      <div class="rlabel">${label}</div>
+      <div class="rvalue ${files.length ? '' : 'missing'}">${files.length ? `✓ ${files.length} archivo(s)` : '⚠ Pendiente'}</div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('review-content').innerHTML = `
+    <div class="review-section">
+      <h3>Datos Personales</h3>
+      <div class="review-grid">
+        <div class="review-item"><div class="rlabel">Nombre Completo</div><div class="rvalue">${g('nombres')} ${g('ap_paterno')} ${g('ap_materno')}</div></div>
+        <div class="review-item"><div class="rlabel">RUT</div><div class="rvalue">${g('rut')}</div></div>
+        <div class="review-item"><div class="rlabel">Fecha Nacimiento</div><div class="rvalue">${g('fecha_nac')}</div></div>
+        <div class="review-item"><div class="rlabel">Género</div><div class="rvalue">${g('genero')}</div></div>
+        <div class="review-item"><div class="rlabel">Estado Civil</div><div class="rvalue">${g('estado_civil')}</div></div>
+        <div class="review-item"><div class="rlabel">Nacionalidad</div><div class="rvalue">${g('nacionalidad')}</div></div>
+        <div class="review-item"><div class="rlabel">Dirección</div><div class="rvalue">${g('direccion')}, ${g('comuna')}, ${g('region')}</div></div>
+        <div class="review-item"><div class="rlabel">Teléfono</div><div class="rvalue">${g('telefono')}</div></div>
+        <div class="review-item"><div class="rlabel">Email</div><div class="rvalue">${g('email')}</div></div>
+        <div class="review-item"><div class="rlabel">Contacto Emergencia</div><div class="rvalue">${g('emerg_nombre')} (${g('emerg_relacion')}) — ${g('emerg_tel')}</div></div>
+      </div>
+    </div>
+    <div class="review-section">
+      <h3>Antecedentes Laborales</h3>
+      <div class="review-grid">
+        <div class="review-item"><div class="rlabel">N° Credencial OS-10</div><div class="rvalue">${g('os10_num')}</div></div>
+        <div class="review-item"><div class="rlabel">Vencimiento OS-10</div><div class="rvalue">${g('os10_venc')}</div></div>
+        <div class="review-item"><div class="rlabel">Categoría OS-10</div><div class="rvalue">${g('os10_cat')}</div></div>
+        <div class="review-item"><div class="rlabel">AFP</div><div class="rvalue">${g('afp')}</div></div>
+        <div class="review-item"><div class="rlabel">Salud</div><div class="rvalue">${g('salud')}</div></div>
+        <div class="review-item"><div class="rlabel">Mutual</div><div class="rvalue">${g('mutual')}</div></div>
+      </div>
+    </div>
+    <div class="review-section">
+      <h3>Cuenta Bancaria</h3>
+      <div class="review-grid">
+        <div class="review-item"><div class="rlabel">Banco</div><div class="rvalue">${g('banco')}</div></div>
+        <div class="review-item"><div class="rlabel">Tipo Cuenta</div><div class="rvalue">${g('tipo_cuenta')}</div></div>
+        <div class="review-item"><div class="rlabel">N° Cuenta</div><div class="rvalue">${g('num_cuenta')}</div></div>
+      </div>
+    </div>
+    <div class="review-section">
+      <h3>Estudios y Cursos</h3>
+      <div class="review-grid">
+        <div class="review-item"><div class="rlabel">Nivel Estudios</div><div class="rvalue">${g('nivel_estudios')}</div></div>
+        <div class="review-item"><div class="rlabel">Institución</div><div class="rvalue">${g('institucion') || '—'}</div></div>
+        <div class="review-item"><div class="rlabel">Curso OS-10</div><div class="rvalue">${g('curso_os10')}</div></div>
+      </div>
+    </div>
+    <div class="review-section">
+      <h3>Documentos Adjuntos</h3>
+      <div class="review-grid">${docStatus}</div>
+    </div>
+
+  `;
+}
+
+// ══════════════════════════════════════════════
+// SUBMIT
+// ══════════════════════════════════════════════
+async function submitForm() {
+  // Validación final completa
+  let allValid = true;
+  for (let s = 1; s <= 5; s++) {
+    if (!validateStep(s)) allValid = false;
+  }
+  if (!allValid) {
+    showAlert('⚠ Hay campos obligatorios incompletos. Revise cada sección antes de enviar.');
+    return;
+  }
+
+  const modal = document.getElementById('modal-loading');
+  const modalSub = document.getElementById('modal-sub-text');
+  modal.classList.add('show');
+
+  // Simular progreso con mensajes
+  const msgs = [
+    'Enviando datos a Recursos Humanos...',
+    'Subiendo documentos adjuntos...',
+    'Notificando a Gerencia de Operaciones...',
+    'Generando referencia de ingreso...'
+  ];
+  let mi = 0;
+  const interval = setInterval(() => {
+    if (mi < msgs.length - 1) modalSub.textContent = msgs[++mi];
+  }, 900);
+
+  // Recolectar datos
+  const g = id => { const el = document.getElementById(id); return el ? el.value : ''; };
+  const formData = {
+    timestamp: new Date().toISOString(),
+    nombres: g('nombres'),
+    ap_paterno: g('ap_paterno'),
+    ap_materno: g('ap_materno'),
+    rut: g('rut'),
+    fecha_nac: g('fecha_nac'),
+    genero: g('genero'),
+    estado_civil: g('estado_civil'),
+    nacionalidad: g('nacionalidad'),
+    direccion: g('direccion'),
+    comuna: g('comuna'),
+    region: g('region'),
+    telefono: g('telefono'),
+    email: g('email'),
+    emerg_nombre: g('emerg_nombre'),
+    emerg_relacion: g('emerg_relacion'),
+    emerg_tel: g('emerg_tel'),
+    emerg_email: g('emerg_email'),
+    cargas: g('cargas'),
+    os10_num: g('os10_num'),
+    os10_venc: g('os10_venc'),
+    os10_cat: g('os10_cat'),
+    licencia: g('licencia'),
+    afp: g('afp'),
+    salud: g('salud'),
+    isapre: g('isapre_nombre'),
+    mutual: g('mutual'),
+    antec_com: g('antec_com'),
+    antec_pen: g('antec_pen'),
+    exam_psico: g('exam_psico'),
+    exam_fisico: g('exam_fisico'),
+    grupo_sg: g('grupo_sg'),
+    banco: g('banco'),
+    tipo_cuenta: g('tipo_cuenta'),
+    num_cuenta: g('num_cuenta'),
+    nivel_estudios: g('nivel_estudios'),
+    institucion: g('institucion'),
+    titulo: g('titulo'),
+    curso_os10: g('curso_os10'),
+    otros_cursos: g('otros_cursos'),
+    exp_seguridad: g('exp_seguridad'),
+    ultima_empresa: g('ultima_empresa'),
+    obs_experiencia: g('obs_experiencia'),
+    docs_adjuntos: Object.entries(uploadedFiles)
+      .filter(([,v]) => v.length > 0)
+      .map(([k,v]) => `${k}: ${v.map(f=>f.name).join(', ')}`)
+      .join(' | '),
+    emails_notif: `${EMAIL_RRHH}, ${EMAIL_GEROPER}, ${EMAIL_GERGEN}, ${g('email')}`
+  };
+
+  try {
+    // Si GAS_URL está configurado, enviar
+    if (GAS_URL !== 'https://script.google.com/macros/s/AKfycbzr1LbD5OeV0lEn8jxafJUb1jjSxWyVL9pHMiJDA6NxoybaWLkloG_rxOKLrUBKOpyn/exec') {
+      await fetch(GAS_URL, {
+        method: 'POST',
+        body: JSON.stringify(formData),
+        headers: { 'Content-Type': 'application/json' }
+      });
+    } else {
+      // Demo mode: simular delay
+      await new Promise(r => setTimeout(r, 3500));
+      console.log('DEMO MODE — Datos del formulario:', formData);
+    }
+
+    clearInterval(interval);
+    modal.classList.remove('show');
+
+    // Mostrar éxito
+    document.getElementById(`step-6`).classList.remove('active');
+    const ref = 'PK-' + new Date().getFullYear() + '-' + String(Date.now()).slice(-6);
+    document.getElementById('success-ref').textContent = `REF: ${ref}`;
+    document.getElementById('success-screen').classList.add('show');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  } catch(e) {
+    clearInterval(interval);
+    modal.classList.remove('show');
+    showAlert('Error al enviar el formulario. Verifique su conexión e intente nuevamente.');
+    console.error(e);
+  }
+}
+</script>
+</body>
+</html>

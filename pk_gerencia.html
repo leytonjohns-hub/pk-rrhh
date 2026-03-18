@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PK SpA — Panel Gerencia</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --pk-black:#0a0c0f;--pk-panel:#161b22;--pk-panel2:#1c2128;
+    --pk-border:#21262d;--pk-border-light:#30363d;
+    --pk-gold:#c9a84c;--pk-gold-dim:#8a6f30;--pk-gold-glow:rgba(201,168,76,0.15);
+    --pk-red:#d9534f;--pk-green:#3fb950;--pk-blue:#58a6ff;--pk-orange:#f0883e;
+    --pk-text:#e6edf3;--pk-muted:#7d8590;--pk-input-bg:#0d1117;
+    --accent:#c9a84c;--accent-glow:rgba(201,168,76,0.12);
+    --font-head:'Rajdhani',sans-serif;--font-body:'Source Sans 3',sans-serif;
+    --sidebar-w:240px;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--pk-black);color:var(--pk-text);font-family:var(--font-body);font-size:14px;display:flex;min-height:100vh;}
+
+  .sidebar{width:var(--sidebar-w);background:var(--pk-panel);border-right:1px solid var(--pk-border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;}
+  .sidebar-logo{padding:1.5rem;border-bottom:1px solid var(--pk-border);display:flex;align-items:center;gap:12px;}
+  .s-hex{width:36px;height:36px;background:var(--pk-gold);clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);display:flex;align-items:center;justify-content:center;}
+  .s-hex span{font-family:var(--font-head);font-weight:700;font-size:13px;color:var(--pk-black);}
+  .s-title{font-family:var(--font-head);font-size:.95rem;font-weight:600;letter-spacing:.06em;line-height:1.2;}
+  .s-sub{font-size:.7rem;color:var(--pk-muted);}
+  .sidebar-user{padding:1rem 1.5rem;border-bottom:1px solid var(--pk-border);background:var(--accent-glow);}
+  .su-label{font-size:.68rem;color:var(--pk-muted);letter-spacing:.12em;text-transform:uppercase;}
+  .su-name{font-family:var(--font-head);font-size:1rem;font-weight:600;color:var(--pk-gold);margin-top:2px;}
+  .su-role{display:inline-block;font-size:.65rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--pk-black);background:var(--pk-gold);padding:2px 8px;margin-top:4px;}
+  .sidebar-nav{flex:1;padding:1rem 0;overflow-y:auto;}
+  .nav-section{font-family:var(--font-head);font-size:.65rem;font-weight:600;letter-spacing:.18em;color:var(--pk-muted);text-transform:uppercase;padding:.75rem 1.5rem .4rem;}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:10px 1.5rem;cursor:pointer;transition:all .15s;border-left:3px solid transparent;font-size:.88rem;color:var(--pk-muted);}
+  .nav-item:hover{background:var(--accent-glow);color:var(--pk-text);}
+  .nav-item.active{background:var(--accent-glow);color:var(--pk-gold);border-left-color:var(--pk-gold);}
+  .nav-item .ni-icon{font-size:1rem;width:20px;text-align:center;}
+  .nav-badge{margin-left:auto;background:var(--pk-red);color:#fff;font-size:.65rem;font-weight:700;padding:1px 6px;border-radius:10px;min-width:18px;text-align:center;}
+  .sidebar-footer{padding:1rem 1.5rem;border-top:1px solid var(--pk-border);}
+  .btn-logout{width:100%;background:transparent;border:1px solid var(--pk-border-light);color:var(--pk-muted);font-family:var(--font-head);font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:8px;cursor:pointer;transition:all .2s;}
+  .btn-logout:hover{border-color:var(--pk-red);color:var(--pk-red);}
+
+  .main{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;}
+  .topbar{background:var(--pk-panel);border-bottom:1px solid var(--pk-border);padding:0 2rem;height:56px;display:flex;align-items:center;gap:1rem;position:sticky;top:0;z-index:50;}
+  .topbar-title{font-family:var(--font-head);font-size:1.1rem;font-weight:600;letter-spacing:.06em;}
+  .topbar-actions{margin-left:auto;display:flex;gap:8px;}
+  .content{padding:2rem;flex:1;}
+
+  .btn{font-family:var(--font-head);font-size:.8rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:8px 18px;border:none;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:6px;}
+  .btn-secondary{background:transparent;border:1px solid var(--pk-border-light);color:var(--pk-muted);}
+  .btn-secondary:hover{border-color:var(--pk-gold);color:var(--pk-gold);}
+
+  .panel{display:none;}
+  .panel.active{display:block;}
+
+  /* KPI */
+  .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:2rem;}
+  .kpi-grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;margin-bottom:2rem;}
+  .kpi-card{background:var(--pk-panel);border:1px solid var(--pk-border);padding:1.5rem;position:relative;overflow:hidden;}
+  .kpi-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+  .kpi-card.gold::after{background:var(--pk-gold);}
+  .kpi-card.blue::after{background:var(--pk-blue);}
+  .kpi-card.green::after{background:var(--pk-green);}
+  .kpi-card.orange::after{background:var(--pk-orange);}
+  .kpi-card.red::after{background:var(--pk-red);}
+  .kpi-label{font-size:.7rem;color:var(--pk-muted);letter-spacing:.12em;text-transform:uppercase;margin-bottom:10px;}
+  .kpi-val{font-family:var(--font-head);font-size:2.5rem;font-weight:700;line-height:1;}
+  .kpi-card.gold .kpi-val{color:var(--pk-gold);}
+  .kpi-card.blue .kpi-val{color:var(--pk-blue);}
+  .kpi-card.green .kpi-val{color:var(--pk-green);}
+  .kpi-card.orange .kpi-val{color:var(--pk-orange);}
+  .kpi-card.red .kpi-val{color:var(--pk-red);}
+  .kpi-sub{font-size:.75rem;color:var(--pk-muted);margin-top:6px;}
+  .kpi-trend{font-size:.75rem;margin-top:4px;}
+  .kpi-trend.up{color:var(--pk-green);}
+  .kpi-trend.down{color:var(--pk-red);}
+
+  /* CHARTS */
+  .charts-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:2rem;}
+  .chart-card{background:var(--pk-panel);border:1px solid var(--pk-border);}
+  .chart-header{padding:1rem 1.25rem;border-bottom:1px solid var(--pk-border);}
+  .chart-title{font-family:var(--font-head);font-size:.88rem;font-weight:600;letter-spacing:.06em;color:var(--pk-gold);}
+  .chart-body{padding:1.25rem;}
+
+  /* DONUT chart (CSS only) */
+  .donut-wrap{display:flex;align-items:center;gap:1.5rem;}
+  .donut{width:80px;height:80px;border-radius:50%;flex-shrink:0;}
+  .legend{flex:1;}
+  .legend-item{display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:.82rem;}
+  .legend-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0;}
+
+  /* BAR CHART */
+  .bar-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+  .bar-label{font-size:.78rem;color:var(--pk-text);min-width:120px;text-overflow:ellipsis;overflow:hidden;white-space:nowrap;}
+  .bar-track{flex:1;background:var(--pk-border);height:8px;position:relative;}
+  .bar-fill{height:100%;transition:width .6s ease;border-radius:0;}
+  .bar-val{font-size:.75rem;color:var(--pk-muted);min-width:40px;text-align:right;}
+
+  /* TABLE */
+  .table-card{background:var(--pk-panel);border:1px solid var(--pk-border);margin-bottom:1.5rem;}
+  .table-header{padding:1rem 1.25rem;border-bottom:1px solid var(--pk-border);display:flex;align-items:center;gap:1rem;flex-wrap:wrap;}
+  .table-title{font-family:var(--font-head);font-size:.95rem;font-weight:600;letter-spacing:.06em;color:var(--pk-gold);}
+  .search-box{background:var(--pk-input-bg);border:1px solid var(--pk-border-light);color:var(--pk-text);font-family:var(--font-body);font-size:.85rem;padding:7px 12px;outline:none;transition:border-color .2s;}
+  .search-box:focus{border-color:var(--pk-gold);}
+  .search-box::placeholder{color:var(--pk-muted);}
+  .table-wrap{overflow-x:auto;}
+  table{width:100%;border-collapse:collapse;}
+  thead tr{background:var(--pk-panel2);}
+  th{padding:10px 12px;text-align:left;font-family:var(--font-head);font-size:.7rem;font-weight:600;letter-spacing:.12em;color:var(--pk-muted);text-transform:uppercase;border-bottom:1px solid var(--pk-border);white-space:nowrap;}
+  td{padding:10px 12px;font-size:.85rem;border-bottom:1px solid var(--pk-border);vertical-align:middle;}
+  tr:hover td{background:var(--accent-glow);}
+
+  .status-badge{display:inline-block;font-family:var(--font-head);font-size:.65rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:3px 8px;border:1px solid;}
+  .status-badge.pendiente{color:var(--pk-orange);border-color:var(--pk-orange);background:rgba(240,136,62,.08);}
+  .status-badge.revisado{color:var(--pk-green);border-color:var(--pk-green);background:rgba(63,185,80,.08);}
+  .status-badge.contratado{color:var(--pk-blue);border-color:var(--pk-blue);background:rgba(88,166,255,.08);}
+
+  .action-btn{background:none;border:1px solid var(--pk-border-light);color:var(--pk-muted);padding:4px 10px;cursor:pointer;font-size:.75rem;font-family:var(--font-head);font-weight:600;letter-spacing:.08em;text-transform:uppercase;transition:all .15s;}
+  .action-btn:hover{border-color:var(--pk-gold);color:var(--pk-gold);}
+
+  /* ALERTA GERENCIA */
+  .alerta-ger{background:var(--pk-panel2);border:1px solid var(--pk-border);border-left:3px solid var(--pk-red);padding:14px 18px;margin-bottom:8px;display:flex;align-items:center;gap:14px;}
+  .alerta-ger.warn{border-left-color:var(--pk-orange);}
+  .alerta-ger.info{border-left-color:var(--pk-gold);}
+  .ag-icon{font-size:1.4rem;flex-shrink:0;}
+  .ag-body{flex:1;}
+  .ag-title{font-family:var(--font-head);font-size:.95rem;font-weight:600;}
+  .ag-sub{font-size:.78rem;color:var(--pk-muted);margin-top:2px;}
+  .ag-time{font-size:.72rem;color:var(--pk-muted);white-space:nowrap;}
+
+  /* BUSCADOR */
+  .busqueda-result{background:var(--pk-panel2);border:1px solid var(--pk-border);padding:1.5rem;margin-top:1rem;display:none;}
+  .busqueda-result.show{display:block;}
+  .br-label{font-family:var(--font-head);font-size:.72rem;font-weight:600;letter-spacing:.15em;color:var(--pk-gold);text-transform:uppercase;margin-bottom:10px;}
+  .br-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px 16px;}
+  .br-item .bl{font-size:.72rem;color:var(--pk-muted);}
+  .br-item .bv{font-size:.9rem;font-weight:500;}
+
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;display:none;align-items:flex-start;justify-content:center;padding:2rem;overflow-y:auto;backdrop-filter:blur(4px);}
+  .modal-overlay.show{display:flex;}
+  .modal{background:var(--pk-panel);border:1px solid var(--pk-border);width:100%;max-width:700px;margin:auto;animation:modalIn .25s ease both;}
+  @keyframes modalIn{from{opacity:0;transform:translateY(-16px);}to{opacity:1;transform:translateY(0);}}
+  .modal-header{padding:1.25rem 1.5rem;border-bottom:1px solid var(--pk-border);display:flex;align-items:center;gap:1rem;background:var(--accent-glow);}
+  .modal-title{font-family:var(--font-head);font-size:1rem;font-weight:600;color:var(--pk-gold);}
+  .modal-close{margin-left:auto;background:none;border:none;color:var(--pk-muted);font-size:1.3rem;cursor:pointer;}
+  .modal-close:hover{color:var(--pk-red);}
+  .modal-body{padding:1.5rem;max-height:75vh;overflow-y:auto;}
+  .modal-footer{padding:1rem 1.5rem;border-top:1px solid var(--pk-border);display:flex;gap:8px;justify-content:flex-end;}
+
+  .ficha-sec{margin-bottom:1.25rem;}
+  .ficha-sec-t{font-family:var(--font-head);font-size:.72rem;font-weight:600;letter-spacing:.15em;color:var(--pk-gold);text-transform:uppercase;border-bottom:1px solid var(--pk-border);padding-bottom:6px;margin-bottom:8px;}
+  .ficha-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px 16px;}
+  .fi-item .fi-l{font-size:.72rem;color:var(--pk-muted);}
+  .fi-item .fi-v{font-size:.88rem;font-weight:500;}
+
+  .loading-row td{text-align:center;color:var(--pk-muted);padding:2rem;}
+  .toast{position:fixed;bottom:2rem;right:2rem;background:var(--pk-panel);border:1px solid var(--pk-border);border-left:3px solid var(--pk-green);padding:12px 20px;font-size:.88rem;color:var(--pk-green);z-index:999;display:none;}
+  .toast.show{display:block;}
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="s-hex"><span>PK</span></div>
+    <div><div class="s-title">PK SpA</div><div class="s-sub">Sistema RRHH</div></div>
+  </div>
+  <div class="sidebar-user">
+    <div class="su-label">Usuario activo</div>
+    <div class="su-name" id="sb-nombre">—</div>
+    <div class="su-role" id="sb-role">Gerencia</div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">Principal</div>
+    <div class="nav-item active" onclick="showPanel('dashboard')"><span class="ni-icon">📊</span> Dashboard Ejecutivo</div>
+    <div class="nav-item" onclick="showPanel('alertas')"><span class="ni-icon">🔔</span> Alertas <span class="nav-badge" id="badge-alertas">0</span></div>
+    <div class="nav-section">Personal</div>
+    <div class="nav-item" onclick="showPanel('trabajadores')"><span class="ni-icon">👥</span> Todos los Trabajadores</div>
+    <div class="nav-item" onclick="showPanel('buscador')"><span class="ni-icon">🔍</span> Buscador</div>
+    <div class="nav-section">Reportes</div>
+    <div class="nav-item" onclick="showPanel('reportes')"><span class="ni-icon">📈</span> Reportes KPI</div>
+  </nav>
+  <div class="sidebar-footer">
+    <a class="btn-logout" href="#" onclick="irAPantallaPrincipal()" style="display:block;text-align:center;text-decoration:none;margin-bottom:8px;border-color:var(--pk-gold);color:var(--pk-gold)">🏠 Pantalla Principal</a>
+    <button class="btn-logout" onclick="logout()">⏻ Cerrar Sesión</button>
+  </div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title" id="topbar-title">Dashboard Ejecutivo</div>
+    <div class="topbar-actions">
+      <button class="btn btn-secondary" onclick="cargarDatos()">↻ Actualizar</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- DASHBOARD -->
+    <div class="panel active" id="panel-dashboard">
+      <div class="kpi-grid" id="kpi-container">
+        <div class="kpi-card gold"><div class="kpi-label">Total Trabajadores</div><div class="kpi-val" id="kpi-total">—</div><div class="kpi-sub">Dotación actual</div></div>
+        <div class="kpi-card green"><div class="kpi-label">Contratados</div><div class="kpi-val" id="kpi-cont">—</div><div class="kpi-sub">Estado activo</div></div>
+        <div class="kpi-card orange"><div class="kpi-label">Pendientes RRHH</div><div class="kpi-val" id="kpi-pend">—</div><div class="kpi-sub">En revisión</div></div>
+        <div class="kpi-card red"><div class="kpi-label">Alertas Activas</div><div class="kpi-val" id="kpi-alertas">—</div><div class="kpi-sub">Requieren atención</div></div>
+      </div>
+
+      <div class="charts-row">
+        <div class="chart-card">
+          <div class="chart-header"><div class="chart-title">Distribución por Género</div></div>
+          <div class="chart-body"><div id="chart-genero"></div></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-header"><div class="chart-title">Estado de Dotación</div></div>
+          <div class="chart-body"><div id="chart-estado"></div></div>
+        </div>
+      </div>
+
+      <div class="table-card">
+        <div class="table-header"><div class="table-title">Últimos Ingresos</div></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Referencia</th><th>Trabajador</th><th>RUT</th><th>Categoría OS-10</th><th>Fecha</th><th>Estado</th><th></th></tr></thead>
+            <tbody id="tbody-recientes"><tr class="loading-row"><td colspan="7">Cargando...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ALERTAS -->
+    <div class="panel" id="panel-alertas">
+      <div class="table-card">
+        <div class="table-header"><div class="table-title">Alertas del Sistema</div></div>
+        <div style="padding:1.25rem;" id="alertas-container">
+          <div style="color:var(--pk-muted);font-size:.85rem;">Cargando alertas...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TODOS LOS TRABAJADORES -->
+    <div class="panel" id="panel-trabajadores">
+      <div class="table-card">
+        <div class="table-header">
+          <div class="table-title">Dotación Completa</div>
+          <input class="search-box" id="search-trab" placeholder="🔍 Buscar nombre, RUT..." oninput="filtrarTrabajadores()" style="width:260px">
+          <select class="search-box" id="filter-estado" style="width:180px" onchange="filtrarTrabajadores()">
+            <option value="">Todos los estados</option>
+            <option>Pendiente revisión RRHH</option>
+            <option>Revisado</option>
+            <option>Contratado</option>
+            <option>Rechazado</option>
+          </select>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Ref.</th><th>Nombre Completo</th><th>RUT</th><th>Categoría</th><th>AFP</th><th>Salud</th><th>Fecha Ingreso</th><th>Estado</th><th></th></tr></thead>
+            <tbody id="tbody-todos"><tr class="loading-row"><td colspan="9">Cargando...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- BUSCADOR -->
+    <div class="panel" id="panel-buscador">
+      <div class="table-card">
+        <div class="table-header"><div class="table-title">Buscador Avanzado</div></div>
+        <div style="padding:1.5rem;">
+          <div style="display:grid;grid-template-columns:1fr auto;gap:1rem;margin-bottom:1rem;">
+            <div>
+              <select id="busq-tipo" style="background:var(--pk-input-bg);border:1px solid var(--pk-border-light);color:var(--pk-text);padding:10px 14px;font-family:var(--font-body);font-size:.9rem;outline:none;margin-bottom:.75rem;width:100%;">
+                <option value="rut">Buscar por RUT de trabajador</option>
+                <option value="instalacion">Buscar por Instalación / Cliente</option>
+              </select>
+              <input type="text" id="busq-valor" style="background:var(--pk-input-bg);border:1px solid var(--pk-border-light);color:var(--pk-text);padding:10px 14px;font-family:var(--font-body);font-size:.95rem;outline:none;width:100%;"
+                placeholder="Ingrese RUT (ej: 12.345.678-9) o nombre del cliente..."
+                onkeydown="if(event.key==='Enter') ejecutarBusqueda()">
+            </div>
+            <div style="display:flex;align-items:flex-end;">
+              <button class="btn" style="background:var(--pk-gold);color:var(--pk-black);padding:10px 24px;height:46px;" onclick="ejecutarBusqueda()">🔍 Buscar</button>
+            </div>
+          </div>
+
+          <div class="busqueda-result" id="busq-result-rut">
+            <div class="br-label">Resultado — Ficha Completa del Trabajador</div>
+            <div id="busq-rut-content"></div>
+          </div>
+
+          <div class="busqueda-result" id="busq-result-inst">
+            <div class="br-label" id="busq-inst-label">Resultado — Instalación / Cliente</div>
+            <div id="busq-inst-content"></div>
+          </div>
+
+          <div id="busq-noresult" style="display:none;color:var(--pk-muted);font-size:.85rem;margin-top:1rem;">
+            No se encontraron resultados para la búsqueda.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- REPORTES KPI -->
+    <div class="panel" id="panel-reportes">
+      <div class="kpi-grid">
+        <div class="kpi-card blue"><div class="kpi-label">Hombres</div><div class="kpi-val" id="rep-h">—</div></div>
+        <div class="kpi-card gold"><div class="kpi-label">Mujeres</div><div class="kpi-val" id="rep-m">—</div></div>
+        <div class="kpi-card green"><div class="kpi-label">Edad Promedio</div><div class="kpi-val" id="rep-edad">—</div><div class="kpi-sub" id="rep-edad-rango"></div></div>
+        <div class="kpi-card orange"><div class="kpi-label">OS-10 por Vencer</div><div class="kpi-val" id="rep-os10">—</div><div class="kpi-sub">Próx. 30 días</div></div>
+      </div>
+
+      <div class="charts-row">
+        <div class="chart-card">
+          <div class="chart-header"><div class="chart-title">Distribución por AFP</div></div>
+          <div class="chart-body" id="rep-afp">Cargando...</div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-header"><div class="chart-title">Distribución por Salud</div></div>
+          <div class="chart-body" id="rep-salud">Cargando...</div>
+        </div>
+      </div>
+
+      <div class="charts-row">
+        <div class="chart-card">
+          <div class="chart-header"><div class="chart-title">Distribución por Categoría OS-10</div></div>
+          <div class="chart-body" id="rep-categoria">Cargando...</div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-header"><div class="chart-title">Ingresos por Mes (2025)</div></div>
+          <div class="chart-body" id="rep-ingresos">Cargando...</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL FICHA -->
+<div class="modal-overlay" id="modal-ficha">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="mf-title">Ficha del Trabajador</div>
+      <button class="modal-close" onclick="closeModal('modal-ficha')">✕</button>
+    </div>
+    <div class="modal-body" id="mf-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-ficha')">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbzr1LbD5OeV0lEn8jxafJUb1jjSxWyVL9pHMiJDA6NxoybaWLkloG_rxOKLrUBKOpyn/exec';
+let allTrabajadores = [];
+
+document.addEventListener('DOMContentLoaded', () => {
+  const user = JSON.parse(sessionStorage.getItem('pk_user') || 'null');
+  if (!user || (!user.perfil?.includes('Gerencia'))) {
+    window.location.href = 'pk_login.html'; return;
+  }
+  document.getElementById('sb-nombre').textContent = user.nombre;
+  document.getElementById('sb-role').textContent = user.perfil;
+  cargarDatos();
+});
+
+function showPanel(id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const panel = document.getElementById('panel-' + id);
+  if (panel) panel.classList.add('active');
+  const nav = document.querySelector(`[onclick="showPanel('${id}')"]`);
+  if (nav) nav.classList.add('active');
+  const t = {
+    dashboard:   'Dashboard Ejecutivo',
+    alertas:     'Alertas del Sistema',
+    trabajadores:'Dotación Completa',
+    buscador:    'Buscador Avanzado',
+    reportes:    'Reportes KPI'
+  };
+  document.getElementById('topbar-title').textContent = t[id] || id;
+  if (id === 'reportes') generarReportes();
+}
+
+function logout(){sessionStorage.removeItem('pk_user');window.location.href='pk_login.html';}
+
+async function cargarDatos(){
+  try{
+    const r=await fetch(`${GAS_URL}?action=getTrabajadores`);
+    const d=await r.json();
+    allTrabajadores=d.trabajadores||[];
+  }catch(e){
+    allTrabajadores=[
+      {ref:'PK-20250317-123456',nombre:'Juan Carlos González Pérez',rut:'12.345.678-9',os10_cat:'OS-10 Categoría A — Guarda de Seguridad',afp:'AFP Capital',salud:'FONASA B',fecha:'2025-03-17',estado:'Pendiente revisión RRHH',genero:'Masculino',fecha_nac:'1990-05-12',dias:2},
+      {ref:'PK-20250315-234567',nombre:'María Isabel Rodríguez Soto',rut:'11.234.567-8',os10_cat:'OS-10 Categoría B — Vigilante Privado',afp:'AFP Habitat',salud:'ISAPRE',fecha:'2025-03-15',estado:'Revisado',genero:'Femenino',fecha_nac:'1988-11-03',dias:4},
+      {ref:'PK-20250310-345678',nombre:'Pedro Antonio Muñoz Lagos',rut:'10.345.678-7',os10_cat:'OS-10 Categoría A — Guarda de Seguridad',afp:'AFP Provida',salud:'FONASA C',fecha:'2025-03-10',estado:'Contratado',genero:'Masculino',fecha_nac:'1995-08-22',dias:0},
+      {ref:'PK-20250308-456789',nombre:'Ana Luisa Vargas Mora',rut:'9.456.789-6',os10_cat:'OS-10 Categoría C — Supervisor de Seguridad',afp:'AFP Modelo',salud:'FONASA D',fecha:'2025-03-08',estado:'Pendiente revisión RRHH',genero:'Femenino',fecha_nac:'1985-02-14',dias:9},
+      {ref:'PK-20250301-567890',nombre:'Carlos Eduardo Fuentes Díaz',rut:'8.567.890-5',os10_cat:'OS-10 Categoría A — Guarda de Seguridad',afp:'AFP Capital',salud:'FONASA B',fecha:'2025-03-01',estado:'Contratado',genero:'Masculino',fecha_nac:'1992-07-30',dias:0},
+    ];
+  }
+  renderDashboard();
+  renderTodos(allTrabajadores);
+  renderAlertas();
+  document.getElementById('badge-alertas').textContent = allTrabajadores.filter(t=>t.estado?.includes('Pendiente')).length;
+}
+
+function renderDashboard(){
+  document.getElementById('kpi-total').textContent=allTrabajadores.length;
+  document.getElementById('kpi-cont').textContent=allTrabajadores.filter(t=>t.estado==='Contratado').length;
+  document.getElementById('kpi-pend').textContent=allTrabajadores.filter(t=>t.estado?.includes('Pendiente')).length;
+  document.getElementById('kpi-alertas').textContent=allTrabajadores.filter(t=>t.estado?.includes('Pendiente')).length;
+
+  // Género chart
+  const h=allTrabajadores.filter(t=>t.genero==='Masculino').length;
+  const m=allTrabajadores.filter(t=>t.genero==='Femenino').length;
+  const tot=allTrabajadores.length||1;
+  document.getElementById('chart-genero').innerHTML=`
+    <div class="donut-wrap">
+      <div class="donut" style="background:conic-gradient(#58a6ff ${h/tot*360}deg, var(--pk-gold) 0deg)"></div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#58a6ff"></div>Masculino: ${h} (${Math.round(h/tot*100)}%)</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--pk-gold)"></div>Femenino: ${m} (${Math.round(m/tot*100)}%)</div>
+      </div>
+    </div>`;
+
+  // Estado chart
+  const estados=['Pendiente revisión RRHH','Revisado','Contratado','Rechazado'];
+  const colores=['#f0883e','#58a6ff','#3fb950','#d9534f'];
+  const conteos=estados.map(e=>allTrabajadores.filter(t=>t.estado===e).length);
+  document.getElementById('chart-estado').innerHTML=estados.map((e,i)=>`
+    <div class="bar-row">
+      <div class="bar-label">${e.replace('Pendiente revisión RRHH','Pendiente')}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${tot?conteos[i]/tot*100:0}%;background:${colores[i]}"></div></div>
+      <div class="bar-val">${conteos[i]}</div>
+    </div>`).join('');
+
+  // Recientes
+  document.getElementById('tbody-recientes').innerHTML=allTrabajadores.slice(0,5).map(t=>`
+    <tr>
+      <td><span style="font-family:var(--font-head);color:var(--pk-gold);font-size:.78rem">${t.ref}</span></td>
+      <td>${t.nombre}</td>
+      <td style="font-family:var(--font-head)">${t.rut}</td>
+      <td style="font-size:.78rem">${t.os10_cat?.split('—')[0]||'—'}</td>
+      <td style="color:var(--pk-muted);font-size:.8rem">${t.fecha}</td>
+      <td>${estadoBadge(t.estado)}</td>
+      <td><button class="action-btn" onclick="verFicha('${t.ref}')">Ver</button></td>
+    </tr>`).join('');
+}
+
+function renderTodos(lista){
+  document.getElementById('tbody-todos').innerHTML=lista.map(t=>`
+    <tr>
+      <td><span style="font-family:var(--font-head);color:var(--pk-gold);font-size:.78rem">${t.ref}</span></td>
+      <td>${t.nombre}</td>
+      <td style="font-family:var(--font-head)">${t.rut}</td>
+      <td style="font-size:.78rem">${t.os10_cat?.split('—')[0]||'—'}</td>
+      <td>${t.afp||'—'}</td>
+      <td>${t.salud||'—'}</td>
+      <td style="color:var(--pk-muted);font-size:.8rem">${t.fecha}</td>
+      <td>${estadoBadge(t.estado)}</td>
+      <td><button class="action-btn" onclick="verFicha('${t.ref}')">Ver</button></td>
+    </tr>`).join('') || '<tr class="loading-row"><td colspan="9">Sin resultados</td></tr>';
+}
+
+function filtrarTrabajadores(){
+  const q=document.getElementById('search-trab').value.toLowerCase();
+  const est=document.getElementById('filter-estado').value;
+  renderTodos(allTrabajadores.filter(t=>
+    (!q||t.nombre?.toLowerCase().includes(q)||t.rut?.includes(q))&&
+    (!est||t.estado===est)
+  ));
+}
+
+function renderAlertas(){
+  const pend=allTrabajadores.filter(t=>t.estado?.includes('Pendiente'));
+  const c=document.getElementById('alertas-container');
+  if(!pend.length){c.innerHTML='<div style="color:var(--pk-green);font-size:.85rem;">✓ No hay alertas pendientes.</div>';return;}
+  c.innerHTML=pend.map(t=>`
+    <div class="alerta-ger ${(t.dias||0)>5?'':'warn'}">
+      <div class="ag-icon">${(t.dias||0)>5?'🚨':'⚠'}</div>
+      <div class="ag-body">
+        <div class="ag-title">${t.nombre} — ${t.rut}</div>
+        <div class="ag-sub">Ficha pendiente de revisión por RR.HH. · Ref: ${t.ref}</div>
+      </div>
+      <div class="ag-time">${t.dias||0} día(s)</div>
+      <button class="action-btn" style="margin-left:10px" onclick="verFicha('${t.ref}')">Ver</button>
+    </div>`).join('');
+}
+
+function ejecutarBusqueda(){
+  const tipo  = document.getElementById('busq-tipo').value;
+  const valor = document.getElementById('busq-valor').value.trim();
+  const valorL = valor.toLowerCase();
+  document.getElementById('busq-result-rut').classList.remove('show');
+  document.getElementById('busq-result-inst').classList.remove('show');
+  document.getElementById('busq-noresult').style.display = 'none';
+  if (!valor) return;
+
+  if (tipo === 'rut') {
+    const vNorm = valorL.replace(/\./g,'').replace(/-/g,'');
+    const t = allTrabajadores.find(x =>
+      (x.rut||'').toLowerCase().replace(/\./g,'').replace(/-/g,'') === vNorm ||
+      (x.nombre||'').toLowerCase().includes(valorL)
+    );
+    if (!t) { document.getElementById('busq-noresult').style.display = 'block'; return; }
+
+    document.getElementById('busq-rut-content').innerHTML = fichaCompletaGerencia(t);
+    document.getElementById('busq-result-rut').classList.add('show');
+
+  } else {
+    const matches = allTrabajadores.filter(t =>
+      (t.cliente||t.cliente_instalacion||t.instalacion||'').toLowerCase().includes(valorL) ||
+      (t.ultima_empresa||'').toLowerCase().includes(valorL)
+    );
+    const lista = matches.length ? matches : [];
+    if (!lista.length) { document.getElementById('busq-noresult').style.display = 'block'; return; }
+
+    document.getElementById('busq-inst-label').textContent =
+      `${lista.length} trabajador(es) en "${valor}"`;
+    document.getElementById('busq-inst-content').innerHTML = `
+      <table style="width:100%;border-collapse:collapse;margin-top:8px;">
+        <thead><tr style="background:var(--pk-panel)">
+          <th style="padding:8px;text-align:left;font-family:var(--font-head);font-size:.7rem;color:var(--pk-muted);letter-spacing:.1em;text-transform:uppercase">Nombre</th>
+          <th style="padding:8px;text-align:left;font-family:var(--font-head);font-size:.7rem;color:var(--pk-muted);letter-spacing:.1em;text-transform:uppercase">RUT</th>
+          <th style="padding:8px;text-align:left;font-family:var(--font-head);font-size:.7rem;color:var(--pk-muted);letter-spacing:.1em;text-transform:uppercase">Categoría</th>
+          <th style="padding:8px;text-align:left;font-family:var(--font-head);font-size:.7rem;color:var(--pk-muted);letter-spacing:.1em;text-transform:uppercase">Cliente / Instalación</th>
+          <th style="padding:8px;text-align:left;font-family:var(--font-head);font-size:.7rem;color:var(--pk-muted);letter-spacing:.1em;text-transform:uppercase">Turno</th>
+          <th style="padding:8px;text-align:left;font-family:var(--font-head);font-size:.7rem;color:var(--pk-muted);letter-spacing:.1em;text-transform:uppercase">Estado</th>
+          <th></th>
+        </tr></thead>
+        <tbody>${lista.map(t => `
+          <tr style="border-bottom:1px solid var(--pk-border)">
+            <td style="padding:8px;font-size:.85rem">${t.nombre}</td>
+            <td style="padding:8px;font-family:var(--font-head)">${t.rut}</td>
+            <td style="padding:8px;font-size:.78rem">${(t.os10_cat||'—').split('—')[0]}</td>
+            <td style="padding:8px;font-size:.82rem">${t.cliente||t.cliente_instalacion||t.instalacion||'—'}</td>
+            <td style="padding:8px;font-size:.82rem">${t.turno||t.turno_asignado||'—'}</td>
+            <td style="padding:8px">${estadoBadge(t.estado)}</td>
+            <td style="padding:8px">
+              <button class="action-btn" onclick="verFichaCompleta('${t.ref}')">Ver Ficha</button>
+            </td>
+          </tr>`).join('')}
+        </tbody>
+      </table>`;
+    document.getElementById('busq-result-inst').classList.add('show');
+  }
+}
+
+// Ficha completa para gerencia (solo lectura)
+function fichaCompletaGerencia(t) {
+  const sec = (titulo, campos) => `
+    <div style="margin-bottom:1.25rem;">
+      <div style="font-family:var(--font-head);font-size:.7rem;font-weight:600;letter-spacing:.15em;
+                  color:var(--pk-gold);text-transform:uppercase;border-bottom:1px solid var(--pk-border);
+                  padding-bottom:5px;margin-bottom:8px;">${titulo}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px 2rem;">
+        ${campos.filter(([,v])=>v).map(([l,v])=>`
+          <div>
+            <div style="font-size:.68rem;color:var(--pk-muted);letter-spacing:.08em;text-transform:uppercase">${l}</div>
+            <div style="font-size:.85rem;font-weight:500;color:var(--pk-text);margin-top:1px">${v}</div>
+          </div>`).join('')}
+      </div>
+    </div>`;
+
+  return `
+    <div style="background:var(--pk-panel2);border:1px solid var(--pk-border);padding:1.5rem;">
+      <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.25rem;
+                  padding-bottom:1rem;border-bottom:1px solid var(--pk-border);">
+        <div>
+          <div style="font-family:var(--font-head);font-size:1.2rem;font-weight:600;
+                      color:var(--pk-text)">${t.nombre}</div>
+          <div style="font-size:.8rem;color:var(--pk-muted)">${t.rut} · ${(t.os10_cat||'—').split('—')[0]}</div>
+        </div>
+        <div style="margin-left:auto">${estadoBadge(t.estado)}</div>
+        ${t.carpeta ? `<a href="${t.carpeta}" target="_blank" class="action-btn" style="text-decoration:none;margin-left:.5rem">📁 Drive</a>` : ''}
+      </div>
+      ${sec('Datos Personales',[
+        ['RUT',t.rut],['Género',t.genero],['Fecha Nac.',t.fecha_nac],
+        ['Teléfono',t.telefono],['Email',t.email],['Nacionalidad',t.nacionalidad],
+        ['Dirección',t.direccion],['Comuna',t.comuna],
+      ])}
+      ${sec('Antecedentes',[
+        ['Categoría OS-10',t.os10_cat],['Vto. OS-10',t.os10_venc||t['os10_vencimiento']||''],
+        ['AFP',t.afp],['Salud',t.salud],
+        ['Exam. Psic.',t.exam_psico||t['examen_psicologico']||''],
+        ['Exam. Físico',t.exam_fisico||t['examen_fisico']||''],
+      ])}
+      ${sec('Contrato y Asignación',[
+        ['Tipo Contrato',t.tipo_contrato||t['tipo_contrato']||''],
+        ['Inicio',t.fecha_inicio||t['fecha_inicio_contrato']||''],
+        ['Cliente / Instalación',t.cliente||t['cliente_instalacion']||t.instalacion||''],
+        ['Turno',t.turno||t['turno_asignado']||''],
+        ['N° Turno',t.num_turno||t['n_turno_jornada']||''],
+      ])}
+      <div style="font-size:.75rem;color:var(--pk-muted);margin-top:.5rem;
+                  padding:.5rem;background:rgba(201,168,76,.06);border-left:2px solid var(--pk-gold)">
+        Vista de solo lectura. Modificaciones disponibles en panel de RR.HH.
+      </div>
+    </div>`;
+}
+
+function verFichaCompleta(ref) {
+  const t = allTrabajadores.find(x => x.ref === ref);
+  if (!t) return;
+  document.getElementById('mf-title').textContent = `Ficha — ${t.nombre}`;
+  document.getElementById('mf-body').innerHTML = fichaCompletaGerencia(t);
+  openModal('modal-ficha');
+}
+
+function verFicha(ref){
+  verFichaCompleta(ref);
+}
+
+function generarReportes(){
+  const h=allTrabajadores.filter(t=>t.genero==='Masculino').length;
+  const m=allTrabajadores.filter(t=>t.genero==='Femenino').length;
+  document.getElementById('rep-h').textContent=h;
+  document.getElementById('rep-m').textContent=m;
+  document.getElementById('rep-os10').textContent=2;
+  const hoy=new Date();
+  const edades=allTrabajadores.filter(t=>t.fecha_nac).map(t=>{
+    const n=new Date(t.fecha_nac);
+    return Math.floor((hoy-n)/(1000*60*60*24*365.25));
+  }).filter(e=>e>0&&e<100);
+  if(edades.length){
+    const prom=Math.round(edades.reduce((a,b)=>a+b,0)/edades.length);
+    document.getElementById('rep-edad').textContent=prom;
+    document.getElementById('rep-edad-rango').textContent=`Min ${Math.min(...edades)} / Max ${Math.max(...edades)} años`;
+  }
+  const tot=allTrabajadores.length||1;
+  const barChart=(data,color)=>Object.entries(data).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`
+    <div class="bar-row">
+      <div class="bar-label">${k}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${Math.round(v/tot*100)}%;background:${color}"></div></div>
+      <div class="bar-val">${v}</div>
+    </div>`).join('');
+  const afpC={};allTrabajadores.forEach(t=>{if(t.afp)afpC[t.afp]=(afpC[t.afp]||0)+1;});
+  document.getElementById('rep-afp').innerHTML=barChart(afpC,'#58a6ff')||'Sin datos';
+  const salC={};allTrabajadores.forEach(t=>{if(t.salud)salC[t.salud]=(salC[t.salud]||0)+1;});
+  document.getElementById('rep-salud').innerHTML=barChart(salC,'#3fb950')||'Sin datos';
+  const catC={};allTrabajadores.forEach(t=>{if(t.os10_cat){const k=t.os10_cat.split('—')[0].trim();catC[k]=(catC[k]||0)+1;}});
+  document.getElementById('rep-categoria').innerHTML=barChart(catC,var_gold=>'#c9a84c')||'Sin datos';
+  // Ingresos por mes demo
+  const meses=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  const ing=[0,0,3,0,0,0,0,0,0,0,0,0];
+  allTrabajadores.forEach(t=>{if(t.fecha){const m=new Date(t.fecha).getMonth();ing[m]++;}});
+  const maxIng=Math.max(...ing,1);
+  document.getElementById('rep-ingresos').innerHTML=meses.map((mes,i)=>`
+    <div class="bar-row">
+      <div class="bar-label">${mes} 2025</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${ing[i]/maxIng*100}%;background:var(--pk-orange)"></div></div>
+      <div class="bar-val">${ing[i]}</div>
+    </div>`).join('');
+}
+
+function estadoBadge(estado){
+  const map={'Pendiente revisión RRHH':'pendiente','Revisado':'revisado','Contratado':'contratado'};
+  return `<span class="status-badge ${map[estado]||'pendiente'}">${estado||'—'}</span>`;
+}
+
+function estadoBadge(e){
+  const m={'Pendiente revisión RRHH':'pendiente','Revisado':'revisado','Contratado':'contratado','Rechazado':'rechazado'};
+  return `<span class="status-badge ${m[e]||'pendiente'}">${e||'—'}</span>`;
+}
+
+function openModal(id){document.getElementById(id).classList.add('show');}
+function closeModal(id){document.getElementById(id).classList.remove('show');}
+function showToast(msg){const el=document.getElementById('toast');el.textContent=msg;el.className='toast show';clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),3000);}
+
+function irAPantallaPrincipal() {
+  const user = JSON.parse(sessionStorage.getItem('pk_user') || 'null');
+  if (!user) { window.location.href = 'pk_login.html'; return; }
+  const PERFILES = {
+    'RRHH':                  'pk_rrhh.html',
+    'Prevención de Riesgos': 'pk_prevencion.html',
+    'Gerencia Operaciones':  'pk_gerencia.html',
+    'Gerencia General':      'pk_gerencia.html',
+    'Supervisor':            'pk_supervisor.html',
+  };
+  window.location.href = PERFILES[user.perfil] || 'pk_login.html';
+}
+
+</script>
+</body>
+</html>

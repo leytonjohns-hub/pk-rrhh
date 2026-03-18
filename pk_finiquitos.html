@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PK SpA — Finiquitos</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=DM+Mono:wght@400;500&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --pk-black:#0a0c0f; --pk-panel:#161b22; --pk-panel2:#1c2128;
+    --pk-border:#21262d; --pk-border-light:#30363d;
+    --pk-gold:#c9a84c; --pk-gold-glow:rgba(201,168,76,0.12);
+    --pk-red:#d9534f; --pk-green:#3fb950; --pk-blue:#58a6ff;
+    --pk-orange:#f0883e; --pk-text:#e6edf3; --pk-muted:#7d8590;
+    --pk-input-bg:#0d1117;
+    --accent:#c9a84c; --accent-glow:rgba(201,168,76,0.1);
+    --font-head:'Rajdhani',sans-serif;
+    --font-body:'Source Sans 3',sans-serif;
+    --font-mono:'DM Mono',monospace;
+    --sidebar-w:240px;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--pk-black);color:var(--pk-text);font-family:var(--font-body);font-size:14px;display:flex;min-height:100vh;}
+
+  .sidebar{width:var(--sidebar-w);background:var(--pk-panel);border-right:1px solid var(--pk-border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;}
+  .sidebar-logo{padding:1.25rem 1.5rem;border-bottom:1px solid var(--pk-border);display:flex;align-items:center;gap:10px;}
+  .s-hex{width:34px;height:34px;background:var(--pk-gold);clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .s-hex span{font-family:var(--font-head);font-weight:700;font-size:12px;color:var(--pk-black);}
+  .s-title{font-family:var(--font-head);font-size:.9rem;font-weight:600;letter-spacing:.06em;}
+  .s-sub{font-size:.68rem;color:var(--pk-muted);}
+  .sidebar-module{padding:.75rem 1.5rem;border-bottom:1px solid var(--pk-border);background:var(--accent-glow);}
+  .sm-label{font-size:.65rem;color:var(--pk-muted);letter-spacing:.15em;text-transform:uppercase;}
+  .sm-name{font-family:var(--font-head);font-size:1rem;font-weight:600;color:var(--accent);margin-top:2px;}
+  .sidebar-nav{flex:1;padding:1rem 0;overflow-y:auto;}
+  .nav-section{font-family:var(--font-head);font-size:.65rem;font-weight:600;letter-spacing:.18em;color:var(--pk-muted);text-transform:uppercase;padding:.75rem 1.5rem .4rem;}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:10px 1.5rem;cursor:pointer;transition:all .15s;border-left:3px solid transparent;font-size:.88rem;color:var(--pk-muted);}
+  .nav-item:hover{background:var(--accent-glow);color:var(--pk-text);}
+  .nav-item.active{background:var(--accent-glow);color:var(--accent);border-left-color:var(--accent);}
+  .nav-item .ni-icon{font-size:1rem;width:20px;text-align:center;}
+  .sidebar-footer{padding:1rem 1.5rem;border-top:1px solid var(--pk-border);}
+  .btn-back{background:transparent;border:1px solid var(--pk-border-light);color:var(--pk-muted);font-family:var(--font-head);font-size:.75rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:8px;cursor:pointer;transition:all .2s;text-decoration:none;display:block;text-align:center;}
+  .btn-back:hover{border-color:var(--pk-gold);color:var(--pk-gold);}
+
+  .main{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;}
+  .topbar{background:var(--pk-panel);border-bottom:1px solid var(--pk-border);padding:0 2rem;height:56px;display:flex;align-items:center;gap:1rem;position:sticky;top:0;z-index:50;}
+  .topbar-title{font-family:var(--font-head);font-size:1.1rem;font-weight:600;letter-spacing:.06em;}
+  .topbar-actions{margin-left:auto;display:flex;gap:8px;}
+  .content{padding:2rem;flex:1;}
+
+  .btn{font-family:var(--font-head);font-size:.8rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:9px 20px;border:none;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:7px;}
+  .btn-gold{background:var(--pk-gold);color:var(--pk-black);}
+  .btn-gold:hover{background:#e0b85a;}
+  .btn-gold:disabled{opacity:.4;cursor:not-allowed;}
+  .btn-green{background:var(--pk-green);color:var(--pk-black);}
+  .btn-green:hover{background:#52d467;}
+  .btn-secondary{background:transparent;border:1px solid var(--pk-border-light);color:var(--pk-muted);}
+  .btn-secondary:hover{border-color:var(--accent);color:var(--accent);}
+  .btn-red{background:transparent;border:1px solid var(--pk-red);color:var(--pk-red);}
+  .btn-red:hover{background:rgba(217,83,79,.1);}
+
+  .panel{display:none;}
+  .panel.active{display:block;animation:fadeIn .2s ease;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:translateY(0);}}
+
+  .kpi-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:2rem;}
+  .kpi-card{background:var(--pk-panel);border:1px solid var(--pk-border);padding:1.25rem;position:relative;}
+  .kpi-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+  .kpi-card.gold::after{background:var(--pk-gold);}
+  .kpi-card.red::after{background:var(--pk-red);}
+  .kpi-card.blue::after{background:var(--pk-blue);}
+  .kpi-card.green::after{background:var(--pk-green);}
+  .kpi-label{font-size:.68rem;color:var(--pk-muted);letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px;}
+  .kpi-val{font-family:var(--font-mono);font-size:1.6rem;font-weight:500;line-height:1;}
+  .kpi-card.gold .kpi-val{color:var(--pk-gold);}
+  .kpi-card.red .kpi-val{color:var(--pk-red);}
+  .kpi-card.blue .kpi-val{color:var(--pk-blue);}
+  .kpi-card.green .kpi-val{color:var(--pk-green);}
+  .kpi-sub{font-size:.72rem;color:var(--pk-muted);margin-top:5px;}
+
+  .card{background:var(--pk-panel);border:1px solid var(--pk-border);margin-bottom:1.5rem;}
+  .card-header{padding:1rem 1.5rem;border-bottom:1px solid var(--pk-border);display:flex;align-items:center;gap:1rem;background:linear-gradient(90deg,var(--accent-glow),transparent);}
+  .card-title{font-family:var(--font-head);font-size:.95rem;font-weight:600;letter-spacing:.06em;color:var(--accent);}
+  .card-body{padding:1.5rem;}
+
+  .table-wrap{overflow-x:auto;}
+  table{width:100%;border-collapse:collapse;}
+  thead tr{background:var(--pk-panel2);}
+  th{padding:9px 12px;text-align:left;font-family:var(--font-head);font-size:.68rem;font-weight:600;letter-spacing:.12em;color:var(--pk-muted);text-transform:uppercase;border-bottom:1px solid var(--pk-border);white-space:nowrap;}
+  td{padding:9px 12px;font-size:.83rem;border-bottom:1px solid var(--pk-border);vertical-align:middle;}
+  tr:hover td{background:var(--accent-glow);}
+
+  .badge{display:inline-block;font-family:var(--font-head);font-size:.62rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:3px 9px;border:1px solid;}
+  .badge-borrador{color:var(--pk-muted);border-color:var(--pk-muted);background:rgba(125,133,144,.08);}
+  .badge-firmado{color:var(--pk-blue);border-color:var(--pk-blue);background:rgba(88,166,255,.08);}
+  .badge-pagado{color:var(--pk-green);border-color:var(--pk-green);background:rgba(63,185,80,.08);}
+  .badge-161{color:var(--pk-red);border-color:var(--pk-red);background:rgba(217,83,79,.08);}
+  .badge-159{color:var(--pk-gold);border-color:var(--pk-gold);background:var(--pk-gold-glow);}
+  .badge-160{color:var(--pk-orange);border-color:var(--pk-orange);background:rgba(240,136,62,.08);}
+
+  .form-row{margin-bottom:1rem;}
+  .form-row label{display:block;font-family:var(--font-head);font-size:.7rem;font-weight:600;letter-spacing:.12em;color:var(--pk-muted);text-transform:uppercase;margin-bottom:6px;}
+  .form-row input,.form-row select,.form-row textarea{width:100%;background:var(--pk-input-bg);border:1px solid var(--pk-border-light);color:var(--pk-text);font-family:var(--font-body);font-size:.88rem;padding:9px 12px;outline:none;transition:border-color .2s;}
+  .form-row input:focus,.form-row select:focus,.form-row textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow);}
+  .form-row input[type="number"]{font-family:var(--font-mono);}
+  .form-row textarea{resize:vertical;min-height:70px;}
+  .fg2{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+  .fg3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;}
+  .fg4{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;}
+
+  /* CALCULADORA */
+  .calc-section{background:var(--pk-panel2);border:1px solid var(--pk-border);padding:1.25rem;margin-bottom:1rem;}
+  .calc-section-title{font-family:var(--font-head);font-size:.78rem;font-weight:600;letter-spacing:.12em;color:var(--accent);text-transform:uppercase;margin-bottom:1rem;display:flex;align-items:center;gap:8px;}
+  .calc-section-title::after{content:'';flex:1;height:1px;background:var(--pk-border);}
+  .calc-row{display:flex;align-items:center;gap:1rem;margin-bottom:.75rem;}
+  .calc-label{font-size:.82rem;color:var(--pk-text);flex:1;}
+  .calc-formula{font-size:.72rem;color:var(--pk-muted);font-style:italic;flex:1;}
+  .calc-input{width:160px;background:var(--pk-input-bg);border:1px solid var(--pk-border-light);color:var(--pk-gold);font-family:var(--font-mono);font-size:.9rem;padding:7px 10px;outline:none;text-align:right;transition:border-color .2s;}
+  .calc-input:focus{border-color:var(--accent);}
+  .calc-input.auto{color:var(--pk-blue);border-color:rgba(88,166,255,.3);}
+  .calc-input.manual{color:var(--pk-gold);}
+  .calc-toggle{background:none;border:1px solid var(--pk-border-light);color:var(--pk-muted);font-family:var(--font-head);font-size:.65rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:4px 8px;cursor:pointer;transition:all .15s;white-space:nowrap;}
+  .calc-toggle:hover{border-color:var(--accent);color:var(--accent);}
+  .calc-toggle.manual-mode{border-color:var(--pk-gold);color:var(--pk-gold);}
+
+  /* TOTALES */
+  .totales-box{background:var(--pk-black);border:1px solid var(--pk-border);padding:1.5rem;margin:1.5rem 0;}
+  .tot-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--pk-border);}
+  .tot-row:last-child{border-bottom:none;padding-top:12px;margin-top:4px;}
+  .tot-label{font-size:.85rem;color:var(--pk-muted);}
+  .tot-val{font-family:var(--font-mono);font-size:.95rem;}
+  .tot-row.total-final .tot-label{font-family:var(--font-head);font-size:1rem;font-weight:600;color:var(--pk-gold);letter-spacing:.05em;}
+  .tot-row.total-final .tot-val{font-size:1.4rem;color:var(--pk-gold);}
+  .tot-row.descuento .tot-val{color:var(--pk-red);}
+  .tot-row.haber .tot-val{color:var(--pk-green);}
+
+  /* INFO BANNER */
+  .info-banner{background:var(--accent-glow);border:1px solid var(--pk-border);border-left:3px solid var(--accent);padding:1rem 1.25rem;font-size:.84rem;color:var(--pk-muted);line-height:1.6;margin-bottom:1.5rem;}
+  .info-banner strong{color:var(--accent);}
+  .info-banner.legal{border-left-color:var(--pk-gold);background:var(--pk-gold-glow);}
+  .info-banner.legal strong{color:var(--pk-gold);}
+
+  .upload-zone{border:1px dashed var(--pk-border-light);background:var(--pk-input-bg);padding:1.25rem;text-align:center;cursor:pointer;transition:all .2s;position:relative;}
+  .upload-zone:hover{border-color:var(--accent);background:var(--accent-glow);}
+  .upload-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+  .upload-label{font-family:var(--font-head);font-size:.8rem;font-weight:600;color:var(--accent);letter-spacing:.1em;text-transform:uppercase;}
+  .upload-hint{font-size:.75rem;color:var(--pk-muted);margin-top:4px;}
+  .file-attached{display:flex;align-items:center;gap:8px;font-size:.8rem;color:var(--pk-green);background:rgba(63,185,80,.08);border:1px solid rgba(63,185,80,.2);padding:6px 12px;margin-top:8px;}
+
+  .search-box{background:var(--pk-input-bg);border:1px solid var(--pk-border-light);color:var(--pk-text);font-family:var(--font-body);font-size:.85rem;padding:7px 12px;outline:none;transition:border-color .2s;}
+  .search-box:focus{border-color:var(--accent);}
+  .search-box::placeholder{color:var(--pk-muted);}
+
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:200;display:none;align-items:flex-start;justify-content:center;padding:2rem;overflow-y:auto;backdrop-filter:blur(4px);}
+  .modal-overlay.show{display:flex;}
+  .modal{background:var(--pk-panel);border:1px solid var(--pk-border);width:100%;max-width:760px;margin:auto;animation:mIn .25s ease both;}
+  @keyframes mIn{from{opacity:0;transform:translateY(-12px);}to{opacity:1;transform:translateY(0);}}
+  .modal-header{padding:1.25rem 1.5rem;border-bottom:1px solid var(--pk-border);display:flex;align-items:center;gap:1rem;background:var(--accent-glow);}
+  .modal-title{font-family:var(--font-head);font-size:1rem;font-weight:600;color:var(--accent);}
+  .modal-close{margin-left:auto;background:none;border:none;color:var(--pk-muted);font-size:1.3rem;cursor:pointer;}
+  .modal-close:hover{color:var(--pk-red);}
+  .modal-body{padding:1.5rem;max-height:80vh;overflow-y:auto;}
+  .modal-footer{padding:1rem 1.5rem;border-top:1px solid var(--pk-border);display:flex;gap:8px;justify-content:flex-end;}
+
+  .loading-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:300;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
+  .loading-overlay.show{display:flex;}
+  .loading-box{background:var(--pk-panel);border:1px solid var(--pk-border);padding:2.5rem;text-align:center;}
+  .spinner{width:44px;height:44px;border:3px solid var(--pk-border-light);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 1rem;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .loading-title{font-family:var(--font-head);font-size:1rem;font-weight:600;color:var(--accent);}
+
+  .toast{position:fixed;bottom:2rem;right:2rem;background:var(--pk-panel);border:1px solid var(--pk-border);border-left:3px solid var(--pk-green);padding:12px 20px;font-size:.88rem;color:var(--pk-green);z-index:999;display:none;}
+  .toast.show{display:block;}
+  .toast.error{border-left-color:var(--pk-red);color:var(--pk-red);}
+
+  .bar-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+  .bar-label{font-size:.78rem;color:var(--pk-muted);min-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .bar-track{flex:1;background:var(--pk-border);height:8px;}
+  .bar-fill{height:100%;transition:width .5s ease;}
+  .bar-val{font-family:var(--font-mono);font-size:.75rem;color:var(--pk-muted);min-width:80px;text-align:right;}
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="s-hex"><span>PK</span></div>
+    <div><div class="s-title">PK SpA</div><div class="s-sub">Sistema RRHH</div></div>
+  </div>
+  <div class="sidebar-module">
+    <div class="sm-label">Módulo activo</div>
+    <div class="sm-name">📄 Finiquitos</div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">Vistas</div>
+    <div class="nav-item active" onclick="showPanel('listado')"><span class="ni-icon">📋</span> Listado de Finiquitos</div>
+    <div class="nav-item" onclick="showPanel('resumen')"><span class="ni-icon">📊</span> Resumen y KPIs</div>
+    <div class="nav-section">Ingreso</div>
+    <div class="nav-item" onclick="showPanel('nuevo')"><span class="ni-icon">➕</span> Nuevo Finiquito</div>
+    <div class="nav-section">Acciones</div>
+    <div class="nav-item" onclick="exportar()"><span class="ni-icon">⬇</span> Exportar Excel</div>
+  </nav>
+  <div class="sidebar-footer">
+    <a class="btn-back" href="#" onclick="irAPantallaPrincipal()" style="margin-bottom:8px;border-color:var(--pk-gold);color:var(--pk-gold)">🏠 Pantalla Principal</a>
+    <a class="btn-back" href="pk_rrhh.html">← Volver al Panel RRHH</a>
+  </div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title" id="topbar-title">Listado de Finiquitos</div>
+    <div class="topbar-actions">
+      <select id="sel-anio" class="search-box" style="width:100px" onchange="cargarDatos()">
+        <option value="2025">2025</option>
+        <option value="2024">2024</option>
+        <option value="2023">2023</option>
+      </select>
+      <button class="btn btn-secondary" onclick="cargarDatos()">↻ Actualizar</button>
+      <button class="btn btn-gold" onclick="showPanel('nuevo')">+ Nuevo Finiquito</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ══ LISTADO ══ -->
+    <div class="panel active" id="panel-listado">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Finiquitos Registrados</div>
+          <input class="search-box" id="search-fin" placeholder="🔍 Buscar..." oninput="filtrarTabla(this.value)" style="width:220px;margin-left:auto">
+          <select class="search-box" id="filter-estado" style="width:150px" onchange="filtrarTabla(document.getElementById('search-fin').value)">
+            <option value="">Todos</option>
+            <option value="Borrador">Borrador</option>
+            <option value="Firmado">Firmado</option>
+            <option value="Pagado">Pagado</option>
+          </select>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Trabajador</th><th>RUT</th><th>Causal</th>
+                <th>Fecha Término</th><th>Años Serv.</th>
+                <th>Total Finiquito</th><th>Estado</th><th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-finiquitos">
+              <tr><td colspan="8" style="text-align:center;color:var(--pk-muted);padding:2rem">Cargando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ RESUMEN ══ -->
+    <div class="panel" id="panel-resumen">
+      <div class="kpi-strip">
+        <div class="kpi-card gold"><div class="kpi-label">Total Finiquitos Año</div><div class="kpi-val" id="kpi-total">—</div></div>
+        <div class="kpi-card red"><div class="kpi-label">Monto Total Pagado</div><div class="kpi-val" id="kpi-monto">—</div><div class="kpi-sub">todos los finiquitos</div></div>
+        <div class="kpi-card blue"><div class="kpi-label">Promedio por Finiquito</div><div class="kpi-val" id="kpi-prom">—</div></div>
+        <div class="kpi-card green"><div class="kpi-label">Pendientes de Pago</div><div class="kpi-val" id="kpi-pend">—</div><div class="kpi-sub">firmados sin pagar</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Por Causal de Término</div></div>
+          <div class="card-body" id="chart-causales"></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Por Mes</div></div>
+          <div class="card-body" id="chart-meses"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ NUEVO FINIQUITO ══ -->
+    <div class="panel" id="panel-nuevo">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Nuevo Finiquito</div>
+          <span style="font-size:.78rem;color:var(--pk-muted);margin-left:.5rem">Cálculo automático según datos del sistema</span>
+        </div>
+        <div class="card-body">
+
+          <div class="info-banner legal">
+            <strong>Marco Legal:</strong> El finiquito debe pagarse dentro de los 5 días hábiles siguientes al término
+            del contrato (Art. 163 bis CT). Debe ser firmado ante Notario, Inspector del Trabajo o Ministro de Fe.
+            La indemnización por años de servicio aplica a partir de 1 año de contrato (Art. 163 CT).
+          </div>
+
+          <!-- DATOS DEL TRABAJADOR -->
+          <div class="fg3">
+            <div class="form-row">
+              <label>Trabajador <span style="color:var(--pk-red)">*</span></label>
+              <select id="f-trabajador" onchange="autocompletarTrabajador()">
+                <option value="">— Seleccione —</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <label>Causal de Término <span style="color:var(--pk-red)">*</span></label>
+              <select id="f-causal" onchange="ajustarCausal()">
+                <option value="">— Seleccione —</option>
+                <optgroup label="── Art. 159 (Sin derecho a indemnización) ──">
+                  <option value="159-1">Art. 159 N°1 — Renuncia Voluntaria</option>
+                  <option value="159-2">Art. 159 N°2 — Mutuo Acuerdo</option>
+                  <option value="159-4">Art. 159 N°4 — Vencimiento de Plazo</option>
+                  <option value="159-5">Art. 159 N°5 — Conclusión Obra o Faena</option>
+                </optgroup>
+                <optgroup label="── Art. 160 (Sin derecho a indemnización) ──">
+                  <option value="160">Art. 160 — Falta de Probidad / Conducta Indebida</option>
+                </optgroup>
+                <optgroup label="── Art. 161 (Con derecho a indemnización) ──">
+                  <option value="161-nec">Art. 161 — Necesidades de la Empresa</option>
+                  <option value="161-des">Art. 161 — Desahucio del Empleador</option>
+                </optgroup>
+              </select>
+            </div>
+            <div class="form-row">
+              <label>Estado del Finiquito</label>
+              <select id="f-estado">
+                <option value="Borrador">Borrador</option>
+                <option value="Firmado">Firmado</option>
+                <option value="Pagado">Pagado</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Aviso causal -->
+          <div id="aviso-causal" class="info-banner" style="display:none"></div>
+
+          <div class="fg4">
+            <div class="form-row">
+              <label>Fecha Inicio Contrato</label>
+              <input type="date" id="f-fecha-inicio" onchange="calcularAnios()">
+            </div>
+            <div class="form-row">
+              <label>Fecha Término Contrato <span style="color:var(--pk-red)">*</span></label>
+              <input type="date" id="f-fecha-termino" onchange="calcularAnios()">
+            </div>
+            <div class="form-row">
+              <label>Años de Servicio</label>
+              <input type="number" id="f-anios" placeholder="Auto" step="0.1" min="0" style="font-family:var(--font-mono)" oninput="calcularFiniquito()">
+            </div>
+            <div class="form-row">
+              <label>Sueldo Base Último Mes</label>
+              <input type="number" id="f-sueldo-base" placeholder="$ 0" min="0" oninput="calcularFiniquito()">
+            </div>
+          </div>
+
+          <!-- CALCULADORA DE ÍTEMS -->
+          <div class="calc-section">
+            <div class="calc-section-title">Haberes del Finiquito</div>
+
+            <!-- Remuneraciones adeudadas -->
+            <div class="calc-row">
+              <div class="calc-label">Remuneraciones Adeudadas</div>
+              <div class="calc-formula">Días trabajados últimos mes</div>
+              <button class="calc-toggle" id="tog-rem" onclick="toggleManual('rem')">Auto</button>
+              <input type="number" id="c-rem" class="calc-input auto" placeholder="0" oninput="calcularTotales()">
+            </div>
+
+            <!-- Feriado proporcional -->
+            <div class="calc-row">
+              <div class="calc-label">Feriado Proporcional</div>
+              <div class="calc-formula">(Días hábiles trabajados / 245) × sueldo</div>
+              <button class="calc-toggle" id="tog-feriado" onclick="toggleManual('feriado')">Auto</button>
+              <input type="number" id="c-feriado" class="calc-input auto" placeholder="0" oninput="calcularTotales()">
+            </div>
+
+            <!-- Proporcional gratificación -->
+            <div class="calc-row">
+              <div class="calc-label">Proporcional Gratificación</div>
+              <div class="calc-formula">Meses trabajados × (sueldo × 25% / 12)</div>
+              <button class="calc-toggle" id="tog-gratif" onclick="toggleManual('gratif')">Auto</button>
+              <input type="number" id="c-gratif" class="calc-input auto" placeholder="0" oninput="calcularTotales()">
+            </div>
+
+            <!-- Proporcional bonos -->
+            <div class="calc-row">
+              <div class="calc-label">Proporcional Bonos Último Mes</div>
+              <div class="calc-formula">Colación + Movilización proporcional</div>
+              <button class="calc-toggle" id="tog-bonos" onclick="toggleManual('bonos')">Auto</button>
+              <input type="number" id="c-bonos" class="calc-input auto" placeholder="0" oninput="calcularTotales()">
+            </div>
+
+            <!-- Indemnización años servicio -->
+            <div class="calc-row" id="row-indem" style="display:none">
+              <div class="calc-label">Indemnización por Años de Servicio</div>
+              <div class="calc-formula">Años de servicio × último sueldo mensual</div>
+              <button class="calc-toggle" id="tog-indem" onclick="toggleManual('indem')">Auto</button>
+              <input type="number" id="c-indem" class="calc-input auto" placeholder="0" oninput="calcularTotales()">
+            </div>
+
+            <!-- Indemnización aviso previo -->
+            <div class="calc-row" id="row-aviso" style="display:none">
+              <div class="calc-label">Indemnización Sustitutiva Aviso Previo</div>
+              <div class="calc-formula">30 días de último sueldo mensual</div>
+              <button class="calc-toggle" id="tog-aviso" onclick="toggleManual('aviso')">Auto</button>
+              <input type="number" id="c-aviso" class="calc-input auto" placeholder="0" oninput="calcularTotales()">
+            </div>
+
+            <!-- Otros haberes -->
+            <div class="calc-row">
+              <div class="calc-label">Otros Haberes</div>
+              <div class="calc-formula">Horas extra, bonos pendientes, etc.</div>
+              <div style="width:60px"></div>
+              <input type="number" id="c-otros-hab" class="calc-input manual" placeholder="0" oninput="calcularTotales()">
+            </div>
+          </div>
+
+          <div class="calc-section">
+            <div class="calc-section-title">Descuentos</div>
+
+            <div class="calc-row">
+              <div class="calc-label">Anticipos / Préstamos Pendientes</div>
+              <div class="calc-formula"></div>
+              <div style="width:60px"></div>
+              <input type="number" id="d-anticipos" class="calc-input manual" placeholder="0" oninput="calcularTotales()">
+            </div>
+            <div class="calc-row">
+              <div class="calc-label">Otros Descuentos</div>
+              <div class="calc-formula"></div>
+              <div style="width:60px"></div>
+              <input type="number" id="d-otros" class="calc-input manual" placeholder="0" oninput="calcularTotales()">
+            </div>
+          </div>
+
+          <!-- TOTALES -->
+          <div class="totales-box">
+            <div class="tot-row haber">
+              <span class="tot-label">Remuneraciones Adeudadas</span>
+              <span class="tot-val" id="tot-rem">$ 0</span>
+            </div>
+            <div class="tot-row haber">
+              <span class="tot-label">Feriado Proporcional</span>
+              <span class="tot-val" id="tot-feriado">$ 0</span>
+            </div>
+            <div class="tot-row haber">
+              <span class="tot-label">Proporcional Gratificación</span>
+              <span class="tot-val" id="tot-gratif">$ 0</span>
+            </div>
+            <div class="tot-row haber">
+              <span class="tot-label">Proporcional Bonos</span>
+              <span class="tot-val" id="tot-bonos">$ 0</span>
+            </div>
+            <div class="tot-row haber" id="tot-row-indem" style="display:none">
+              <span class="tot-label">Indemnización Años de Servicio</span>
+              <span class="tot-val" id="tot-indem">$ 0</span>
+            </div>
+            <div class="tot-row haber" id="tot-row-aviso" style="display:none">
+              <span class="tot-label">Indemnización Aviso Previo</span>
+              <span class="tot-val" id="tot-aviso">$ 0</span>
+            </div>
+            <div class="tot-row haber">
+              <span class="tot-label">Otros Haberes</span>
+              <span class="tot-val" id="tot-otros-hab">$ 0</span>
+            </div>
+            <div class="tot-row descuento">
+              <span class="tot-label">(-) Descuentos</span>
+              <span class="tot-val" id="tot-descuentos">$ 0</span>
+            </div>
+            <div class="tot-row total-final">
+              <span class="tot-label">💰 TOTAL FINIQUITO</span>
+              <span class="tot-val" id="tot-final">$ 0</span>
+            </div>
+          </div>
+
+          <!-- DATOS ADICIONALES -->
+          <div class="fg2">
+            <div class="form-row">
+              <label>Fecha de Pago del Finiquito</label>
+              <input type="date" id="f-fecha-pago">
+            </div>
+            <div class="form-row">
+              <label>Ministro de Fe / Notario</label>
+              <input type="text" id="f-ministro-fe" placeholder="Nombre del Notario o Inspector del Trabajo">
+            </div>
+          </div>
+          <div class="form-row">
+            <label>Observaciones</label>
+            <textarea id="f-obs" placeholder="Notas adicionales sobre el finiquito..."></textarea>
+          </div>
+          <div class="fg2">
+            <div class="form-row">
+              <label>Adjuntar Finiquito Firmado</label>
+              <div class="upload-zone">
+                <input type="file" id="f-pdf" accept=".pdf,.jpg,.png" onchange="adjuntarDoc(this)">
+                <div class="upload-label">📄 Subir Documento Firmado</div>
+                <div class="upload-hint">PDF, JPG o PNG — Máx. 10 MB</div>
+              </div>
+              <div class="file-attached" id="f-pdf-attached" style="display:none">
+                📎 <span id="f-pdf-nombre"></span>
+              </div>
+            </div>
+            <div class="form-row" style="display:flex;flex-direction:column;justify-content:flex-end;">
+              <div style="background:var(--pk-panel2);border:1px solid var(--pk-border);padding:1rem;">
+                <div style="font-size:.7rem;color:var(--pk-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Trabajador recibirá (neto):</div>
+                <div id="resumen-neto" style="font-family:var(--font-mono);font-size:1.6rem;color:var(--pk-gold)">$ 0</div>
+                <div style="font-size:.72rem;color:var(--pk-muted);margin-top:4px" id="resumen-causal-txt">—</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:1rem;margin-top:1rem;">
+            <button class="btn btn-gold" onclick="guardarFiniquito()">💾 Guardar Finiquito</button>
+            <button class="btn btn-secondary" onclick="limpiarForm()">✕ Limpiar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL VER FINIQUITO -->
+<div class="modal-overlay" id="modal-fin">
+  <div class="modal" style="max-width:800px">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-fin-title">Detalle Finiquito</div>
+      <button class="modal-close" onclick="closeModal('modal-fin')">✕</button>
+    </div>
+    <div class="modal-body" id="modal-fin-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-fin')">Cerrar</button>
+      <button class="btn btn-green" id="btn-marcar-pagado" onclick="marcarPagado()">✓ Marcar como Pagado</button>
+      <button class="btn btn-red" onclick="eliminarFiniquito()">🗑 Eliminar</button>
+    </div>
+  </div>
+</div>
+
+<div class="loading-overlay" id="loading">
+  <div class="loading-box">
+    <div class="spinner"></div>
+    <div class="loading-title" id="loading-msg">Guardando...</div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbzr1LbD5OeV0lEn8jxafJUb1jjSxWyVL9pHMiJDA6NxoybaWLkloG_rxOKLrUBKOpyn/exec';
+
+let allTrabajadores = [];
+let finiquitos      = [];
+let finActual       = null;
+const manuales      = {};
+
+const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio',
+               'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
+const CAUSALES = {
+  '159-1': { label:'Art. 159 N°1 — Renuncia Voluntaria',   tipo:'159', indem:false, aviso:false },
+  '159-2': { label:'Art. 159 N°2 — Mutuo Acuerdo',         tipo:'159', indem:false, aviso:false },
+  '159-4': { label:'Art. 159 N°4 — Vencimiento de Plazo',  tipo:'159', indem:false, aviso:false },
+  '159-5': { label:'Art. 159 N°5 — Conclusión Obra/Faena', tipo:'159', indem:false, aviso:false },
+  '160':   { label:'Art. 160 — Falta de Probidad',          tipo:'160', indem:false, aviso:false },
+  '161-nec':{ label:'Art. 161 — Necesidades de la Empresa', tipo:'161', indem:true,  aviso:true  },
+  '161-des':{ label:'Art. 161 — Desahucio del Empleador',   tipo:'161', indem:true,  aviso:true  },
+};
+
+// ── INIT ─────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  const user = JSON.parse(sessionStorage.getItem('pk_user') || 'null');
+  if (!user || (user.perfil !== 'RRHH' && !user.perfil?.includes('Gerencia'))) {
+    window.location.href = 'pk_login.html'; return;
+  }
+  cargarDatos();
+});
+
+// ── NAVEGACIÓN ────────────────────────────────────────────
+function showPanel(id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  const nav = document.querySelector(`[onclick="showPanel('${id}')"]`);
+  if (nav) nav.classList.add('active');
+  const titles = { listado:'Listado de Finiquitos', resumen:'Resumen y KPIs', nuevo:'Nuevo Finiquito' };
+  document.getElementById('topbar-title').textContent = titles[id] || id;
+  if (id === 'resumen') renderResumen();
+}
+
+// ── CARGAR DATOS ──────────────────────────────────────────
+async function cargarDatos() {
+  try {
+    const rt = await fetch(`${GAS_URL}?action=getTrabajadores`);
+    const dt = await rt.json();
+    allTrabajadores = dt.trabajadores || [];
+    const rf = await fetch(`${GAS_URL}?action=getFiniquitos&anio=${document.getElementById('sel-anio').value}`);
+    const df = await rf.json();
+    finiquitos = df.finiquitos || [];
+  } catch(e) {
+    allTrabajadores = demoTrabajadores();
+    finiquitos      = demoFiniquitos();
+  }
+  poblarSelect();
+  renderListado();
+}
+
+function demoTrabajadores() {
+  return [
+    { ref:'PK-001', nombre:'Juan Carlos González Pérez',  rut:'12.345.678-9', estado:'Contratado', fecha_inicio:'2020-03-01' },
+    { ref:'PK-002', nombre:'María Isabel Rodríguez Soto', rut:'11.234.567-8', estado:'Contratado', fecha_inicio:'2022-06-15' },
+    { ref:'PK-003', nombre:'Pedro Antonio Muñoz Lagos',   rut:'10.345.678-7', estado:'Contratado', fecha_inicio:'2019-01-10' },
+  ];
+}
+
+function demoFiniquitos() {
+  return [
+    { id:'F001', ref:'PK-003', rut:'10.345.678-7', nombre:'Pedro Antonio Muñoz Lagos',
+      causal:'161-nec', causal_label:'Art. 161 — Necesidades de la Empresa',
+      fecha_inicio:'2019-01-10', fecha_termino:'2025-02-28', anios:6.1,
+      sueldo_base:650000, rem:0, feriado:85000, gratif:40000, bonos:81000,
+      indem:3900000, aviso:650000, otros_hab:0,
+      d_anticipos:0, d_otros:0, total:5356000,
+      estado:'Pagado', fecha_pago:'2025-03-05', ministro_fe:'Notaría López', obs:'', pdf_url:'' },
+    { id:'F002', ref:'PK-001', rut:'12.345.678-9', nombre:'Juan Carlos González Pérez',
+      causal:'159-1', causal_label:'Art. 159 N°1 — Renuncia Voluntaria',
+      fecha_inicio:'2020-03-01', fecha_termino:'2025-03-15', anios:5.0,
+      sueldo_base:580000, rem:290000, feriado:72000, gratif:36000, bonos:60000,
+      indem:0, aviso:0, otros_hab:0,
+      d_anticipos:50000, d_otros:0, total:408000,
+      estado:'Firmado', fecha_pago:'', ministro_fe:'Inspector del Trabajo', obs:'', pdf_url:'' },
+  ];
+}
+
+function poblarSelect() {
+  const opts = '<option value="">— Seleccione —</option>' +
+    allTrabajadores.filter(t => t.estado === 'Contratado')
+      .map(t => `<option value="${t.ref}">${t.nombre} (${t.rut})</option>`).join('');
+  const sel = document.getElementById('f-trabajador');
+  if (sel) sel.innerHTML = opts;
+}
+
+// ── RENDER LISTADO ────────────────────────────────────────
+function renderListado() {
+  const tbody = document.getElementById('tbody-finiquitos');
+  if (!finiquitos.length) {
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:var(--pk-muted);padding:2rem">Sin finiquitos registrados</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = finiquitos.map(f => {
+    const causalTipo = f.causal?.startsWith('161') ? '161' : f.causal?.startsWith('160') ? '160' : '159';
+    return `<tr>
+      <td>${f.nombre}</td>
+      <td style="font-family:var(--font-mono);font-size:.78rem">${f.rut}</td>
+      <td><span class="badge badge-${causalTipo}" style="font-size:.6rem">${f.causal_label?.split('—')[0]||'—'}</span></td>
+      <td style="font-family:var(--font-mono);font-size:.8rem">${f.fecha_termino||'—'}</td>
+      <td style="font-family:var(--font-mono);color:var(--pk-gold)">${parseFloat(f.anios||0).toFixed(1)}</td>
+      <td style="font-family:var(--font-mono);color:var(--pk-gold);font-weight:500">$ ${parseInt(f.total||0).toLocaleString('es-CL')}</td>
+      <td><span class="badge badge-${(f.estado||'Borrador').toLowerCase()}">${f.estado||'Borrador'}</span></td>
+      <td>
+        <button class="btn btn-secondary" style="padding:3px 10px;font-size:.7rem" onclick="verFiniquito('${f.id}')">Ver</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function filtrarTabla(q) {
+  const est = document.getElementById('filter-estado').value.toLowerCase();
+  document.querySelectorAll('#tbody-finiquitos tr').forEach(tr => {
+    const matchQ   = !q || tr.textContent.toLowerCase().includes(q.toLowerCase());
+    const matchEst = !est || tr.textContent.toLowerCase().includes(est);
+    tr.style.display = matchQ && matchEst ? '' : 'none';
+  });
+}
+
+// ── RENDER RESUMEN ────────────────────────────────────────
+function renderResumen() {
+  const total   = finiquitos.length;
+  const monto   = finiquitos.reduce((s,f) => s+(parseInt(f.total)||0), 0);
+  const prom    = total ? Math.round(monto/total) : 0;
+  const pend    = finiquitos.filter(f => f.estado === 'Firmado').length;
+
+  document.getElementById('kpi-total').textContent = total;
+  document.getElementById('kpi-monto').textContent = formatPeso(monto);
+  document.getElementById('kpi-prom').textContent  = formatPeso(prom);
+  document.getElementById('kpi-pend').textContent  = pend;
+
+  // Chart causales
+  const causalCont = {};
+  finiquitos.forEach(f => {
+    const lbl = f.causal_label?.split('—')[0]?.trim() || f.causal || '—';
+    causalCont[lbl] = (causalCont[lbl]||0)+1;
+  });
+  const maxC = Math.max(...Object.values(causalCont),1);
+  document.getElementById('chart-causales').innerHTML =
+    Object.entries(causalCont).sort((a,b)=>b[1]-a[1]).map(([l,n])=>`
+      <div class="bar-row">
+        <div class="bar-label" title="${l}">${l}</div>
+        <div class="bar-track"><div class="bar-fill" style="width:${n/maxC*100}%;background:var(--pk-gold)"></div></div>
+        <div class="bar-val">${n}</div>
+      </div>`).join('') || '<div style="color:var(--pk-muted);font-size:.85rem">Sin datos</div>';
+
+  // Chart meses
+  const mesCont = Array(12).fill(0);
+  finiquitos.forEach(f => {
+    const m = parseInt((f.fecha_termino||'').split('-')[1])-1;
+    if (m>=0) mesCont[m]++;
+  });
+  const maxM = Math.max(...mesCont,1);
+  document.getElementById('chart-meses').innerHTML =
+    mesCont.map((n,i) => n>0 ? `
+      <div class="bar-row">
+        <div class="bar-label">${MESES[i]}</div>
+        <div class="bar-track"><div class="bar-fill" style="width:${n/maxM*100}%;background:var(--pk-blue)"></div></div>
+        <div class="bar-val">${n}</div>
+      </div>` : '').join('') || '<div style="color:var(--pk-muted);font-size:.85rem">Sin datos</div>';
+}
+
+// ── AUTOCOMPLETAR TRABAJADOR ──────────────────────────────
+function autocompletarTrabajador() {
+  const ref  = document.getElementById('f-trabajador').value;
+  const trab = allTrabajadores.find(t => t.ref === ref);
+  if (!trab) return;
+  if (trab.fecha_inicio || trab.fecha_inicio_contrato) {
+    document.getElementById('f-fecha-inicio').value =
+      trab.fecha_inicio || trab.fecha_inicio_contrato || '';
+  }
+  if (trab.sueldo_base) {
+    document.getElementById('f-sueldo-base').value = trab.sueldo_base;
+  }
+  calcularAnios();
+}
+
+// ── CALCULAR AÑOS ─────────────────────────────────────────
+function calcularAnios() {
+  const ini  = document.getElementById('f-fecha-inicio').value;
+  const term = document.getElementById('f-fecha-termino').value;
+  if (!ini || !term) return;
+  const diff = (new Date(term) - new Date(ini)) / (1000*60*60*24*365.25);
+  document.getElementById('f-anios').value = Math.max(0, diff).toFixed(2);
+  calcularFiniquito();
+}
+
+// ── AJUSTAR CAUSAL ────────────────────────────────────────
+function ajustarCausal() {
+  const causal = document.getElementById('f-causal').value;
+  const c      = CAUSALES[causal];
+  const aviso  = document.getElementById('aviso-causal');
+
+  document.getElementById('row-indem').style.display    = c?.indem ? '' : 'none';
+  document.getElementById('row-aviso').style.display    = c?.aviso ? '' : 'none';
+  document.getElementById('tot-row-indem').style.display= c?.indem ? '' : 'none';
+  document.getElementById('tot-row-aviso').style.display= c?.aviso ? '' : 'none';
+
+  if (c) {
+    const msgs = {
+      '159': '<strong>Art. 159:</strong> Esta causal no da derecho a indemnización por años de servicio. Solo corresponden haberes proporcionales.',
+      '160': '<strong>Art. 160:</strong> Causal de falta grave — no da derecho a indemnización de ningún tipo.',
+      '161': '<strong>Art. 161:</strong> Esta causal da derecho a indemnización por años de servicio y aviso previo (o sustitutiva). El trabajador debe tener mínimo 1 año de servicio.',
+    };
+    aviso.innerHTML = msgs[c.tipo] || '';
+    aviso.style.display = '';
+    document.getElementById('resumen-causal-txt').textContent = c.label;
+  } else {
+    aviso.style.display = 'none';
+  }
+  calcularFiniquito();
+}
+
+// ── CALCULAR FINIQUITO ────────────────────────────────────
+function calcularFiniquito() {
+  const sueldo = parseFloat(document.getElementById('f-sueldo-base').value) || 0;
+  const anios  = parseFloat(document.getElementById('f-anios').value) || 0;
+  const causal = document.getElementById('f-causal').value;
+  const c      = CAUSALES[causal];
+
+  const ini    = document.getElementById('f-fecha-inicio').value;
+  const term   = document.getElementById('f-fecha-termino').value;
+
+  // Calcular meses trabajados en el último año para proporcionales
+  let mesesProp = 0;
+  if (ini && term) {
+    const fechaInicio = new Date(Math.max(new Date(ini), new Date(new Date(term).getFullYear(), 0, 1)));
+    mesesProp = Math.max(0, (new Date(term) - fechaInicio) / (1000*60*60*24*30.44));
+  }
+
+  // Remuneraciones adeudadas: días del último mes trabajado
+  if (!manuales['rem']) {
+    const diasUltimoMes = term ? new Date(term).getDate() : 15;
+    const remAuto = Math.round(sueldo / 30 * diasUltimoMes);
+    document.getElementById('c-rem').value = remAuto || 0;
+  }
+
+  // Feriado proporcional: (días hábiles / 245) × sueldo bruto anual
+  if (!manuales['feriado']) {
+    const diasHabilesAnio = term && ini ? Math.min(365, (new Date(term)-new Date(ini))/(1000*60*60*24)) : 0;
+    const feriadoAuto = Math.round((diasHabilesAnio / 365) * 15 * (sueldo / 30));
+    document.getElementById('c-feriado').value = feriadoAuto || 0;
+  }
+
+  // Proporcional gratificación: meses × (sueldo × 25% / 12)
+  if (!manuales['gratif']) {
+    const gratifMes = Math.round(sueldo * 0.25 / 12);
+    document.getElementById('c-gratif').value = Math.round(gratifMes * Math.min(mesesProp, 12)) || 0;
+  }
+
+  // Proporcional bonos: colación $47.000 + movilización $34.000 proporcional
+  if (!manuales['bonos']) {
+    const bonosMes = 47000 + 34000;
+    document.getElementById('c-bonos').value = Math.round(bonosMes * Math.min(mesesProp, 1)) || 0;
+  }
+
+  // Indemnización años de servicio
+  if (!manuales['indem'] && c?.indem) {
+    const aniosCompletos = Math.min(Math.floor(anios), 11); // tope 11 años
+    document.getElementById('c-indem').value = Math.round(aniosCompletos * sueldo) || 0;
+  }
+
+  // Aviso previo sustitutivo
+  if (!manuales['aviso'] && c?.aviso) {
+    document.getElementById('c-aviso').value = sueldo || 0;
+  }
+
+  calcularTotales();
+}
+
+function calcularTotales() {
+  const ids = ['rem','feriado','gratif','bonos','indem','aviso','otros-hab'];
+  const haberes = ids.reduce((s,id) => s+(parseFloat(document.getElementById('c-'+id)?.value)||0), 0);
+  const descuentos = (parseFloat(document.getElementById('d-anticipos').value)||0) +
+                     (parseFloat(document.getElementById('d-otros').value)||0);
+  const total = haberes - descuentos;
+
+  // Actualizar totales visuales
+  ids.forEach(id => {
+    const el = document.getElementById('tot-'+id.replace('-','_').replace('otros_hab','otros-hab'));
+    if (el) el.textContent = formatPeso(parseFloat(document.getElementById('c-'+id)?.value)||0);
+  });
+  // Corregir IDs de totales
+  document.getElementById('tot-rem').textContent       = formatPeso(parseFloat(document.getElementById('c-rem').value)||0);
+  document.getElementById('tot-feriado').textContent   = formatPeso(parseFloat(document.getElementById('c-feriado').value)||0);
+  document.getElementById('tot-gratif').textContent    = formatPeso(parseFloat(document.getElementById('c-gratif').value)||0);
+  document.getElementById('tot-bonos').textContent     = formatPeso(parseFloat(document.getElementById('c-bonos').value)||0);
+  document.getElementById('tot-indem').textContent     = formatPeso(parseFloat(document.getElementById('c-indem')?.value)||0);
+  document.getElementById('tot-aviso').textContent     = formatPeso(parseFloat(document.getElementById('c-aviso')?.value)||0);
+  document.getElementById('tot-otros-hab').textContent = formatPeso(parseFloat(document.getElementById('c-otros-hab').value)||0);
+  document.getElementById('tot-descuentos').textContent= '- ' + formatPeso(descuentos);
+  document.getElementById('tot-final').textContent     = formatPeso(total);
+  document.getElementById('resumen-neto').textContent  = formatPeso(total);
+}
+
+// ── TOGGLE MANUAL/AUTO ────────────────────────────────────
+function toggleManual(campo) {
+  manuales[campo] = !manuales[campo];
+  const btn   = document.getElementById('tog-' + campo);
+  const input = document.getElementById('c-' + campo);
+  if (manuales[campo]) {
+    btn.textContent = 'Manual';
+    btn.classList.add('manual-mode');
+    input.classList.remove('auto');
+    input.classList.add('manual');
+    input.readOnly = false;
+  } else {
+    btn.textContent = 'Auto';
+    btn.classList.remove('manual-mode');
+    input.classList.add('auto');
+    input.classList.remove('manual');
+    calcularFiniquito();
+  }
+}
+
+// ── GUARDAR FINIQUITO ─────────────────────────────────────
+async function guardarFiniquito() {
+  const ref    = document.getElementById('f-trabajador').value;
+  const causal = document.getElementById('f-causal').value;
+  const term   = document.getElementById('f-fecha-termino').value;
+  if (!ref)    { showToast('Seleccione un trabajador', true); return; }
+  if (!causal) { showToast('Seleccione la causal de término', true); return; }
+  if (!term)   { showToast('Ingrese la fecha de término', true); return; }
+
+  const trab = allTrabajadores.find(t => t.ref === ref);
+  const c    = CAUSALES[causal];
+
+  const get = id => parseFloat(document.getElementById(id)?.value)||0;
+  const haberes    = get('c-rem')+get('c-feriado')+get('c-gratif')+get('c-bonos')+get('c-indem')+get('c-aviso')+get('c-otros-hab');
+  const descuentos = get('d-anticipos')+get('d-otros');
+  const total      = haberes - descuentos;
+
+  showLoading('Guardando finiquito...');
+
+  const payload = {
+    action: 'registrarFiniquito',
+    ref, rut: trab?.rut||'', nombre: trab?.nombre||'',
+    causal, causal_label: c?.label||causal,
+    fecha_inicio:  document.getElementById('f-fecha-inicio').value,
+    fecha_termino: term,
+    anios:  document.getElementById('f-anios').value,
+    sueldo_base: get('f-sueldo-base'),
+    rem:      get('c-rem'),
+    feriado:  get('c-feriado'),
+    gratif:   get('c-gratif'),
+    bonos:    get('c-bonos'),
+    indem:    get('c-indem'),
+    aviso:    get('c-aviso'),
+    otros_hab:get('c-otros-hab'),
+    d_anticipos: get('d-anticipos'),
+    d_otros:     get('d-otros'),
+    total,
+    estado:       document.getElementById('f-estado').value,
+    fecha_pago:   document.getElementById('f-fecha-pago').value,
+    ministro_fe:  document.getElementById('f-ministro-fe').value,
+    obs:          document.getElementById('f-obs').value,
+  };
+
+  try {
+    if (!GAS_URL.includes('TU_URL')) {
+      await fetch(GAS_URL, { method:'POST', body:JSON.stringify(payload), headers:{'Content-Type':'application/json'} });
+    } else {
+      await new Promise(r => setTimeout(r,800));
+    }
+    finiquitos.push({ ...payload, id:'F'+Date.now(), pdf_url:'' });
+    hideLoading();
+    limpiarForm();
+    renderListado();
+    showToast('✓ Finiquito guardado correctamente');
+    showPanel('listado');
+  } catch(e) {
+    hideLoading();
+    showToast('Error al guardar', true);
+  }
+}
+
+function limpiarForm() {
+  ['f-trabajador','f-causal','f-estado','f-fecha-inicio','f-fecha-termino',
+   'f-fecha-pago','f-ministro-fe'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  ['f-anios','f-sueldo-base','c-rem','c-feriado','c-gratif','c-bonos',
+   'c-indem','c-aviso','c-otros-hab','d-anticipos','d-otros'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  document.getElementById('f-obs').value = '';
+  document.getElementById('f-pdf-attached').style.display = 'none';
+  document.getElementById('aviso-causal').style.display = 'none';
+  document.getElementById('row-indem').style.display = 'none';
+  document.getElementById('row-aviso').style.display = 'none';
+  document.getElementById('tot-row-indem').style.display = 'none';
+  document.getElementById('tot-row-aviso').style.display = 'none';
+  document.getElementById('tot-final').textContent = '$ 0';
+  document.getElementById('resumen-neto').textContent = '$ 0';
+  Object.keys(manuales).forEach(k => manuales[k] = false);
+}
+
+function adjuntarDoc(input) {
+  const f = input.files[0];
+  if (!f) return;
+  document.getElementById('f-pdf-nombre').textContent = f.name;
+  document.getElementById('f-pdf-attached').style.display = 'flex';
+}
+
+// ── VER FINIQUITO ─────────────────────────────────────────
+function verFiniquito(id) {
+  finActual = finiquitos.find(f => f.id === id);
+  if (!finActual) return;
+  const f = finActual;
+  document.getElementById('modal-fin-title').textContent = `Finiquito — ${f.nombre}`;
+  document.getElementById('btn-marcar-pagado').style.display = f.estado !== 'Pagado' ? '' : 'none';
+
+  document.getElementById('modal-fin-body').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 2rem;margin-bottom:1.5rem;">
+      ${df('Trabajador',f.nombre)} ${df('RUT',f.rut)}
+      ${df('Causal',f.causal_label)} ${df('Estado',f.estado)}
+      ${df('Fecha Inicio',f.fecha_inicio)} ${df('Fecha Término',f.fecha_termino)}
+      ${df('Años Servicio',parseFloat(f.anios||0).toFixed(2))} ${df('Sueldo Base','$ '+parseInt(f.sueldo_base||0).toLocaleString('es-CL'))}
+      ${df('Ministro de Fe',f.ministro_fe||'—')} ${df('Fecha Pago',f.fecha_pago||'—')}
+    </div>
+    <div style="background:var(--pk-black);border:1px solid var(--pk-border);padding:1.25rem;">
+      ${totRow('Remuneraciones Adeudadas',  f.rem,       false)}
+      ${totRow('Feriado Proporcional',       f.feriado,   false)}
+      ${totRow('Proporcional Gratificación', f.gratif,    false)}
+      ${totRow('Proporcional Bonos',         f.bonos,     false)}
+      ${f.indem ? totRow('Indemnización Años Servicio',  f.indem, false) : ''}
+      ${f.aviso ? totRow('Indemnización Aviso Previo',   f.aviso, false) : ''}
+      ${f.otros_hab ? totRow('Otros Haberes', f.otros_hab, false) : ''}
+      ${f.d_anticipos ? totRow('(-) Anticipos', f.d_anticipos, true) : ''}
+      ${f.d_otros ? totRow('(-) Otros Descuentos', f.d_otros, true) : ''}
+      <div style="display:flex;justify-content:space-between;padding:12px 0 0;border-top:1px solid var(--pk-border);margin-top:8px;">
+        <span style="font-family:var(--font-head);font-size:1rem;font-weight:600;color:var(--pk-gold)">💰 TOTAL FINIQUITO</span>
+        <span style="font-family:var(--font-mono);font-size:1.3rem;color:var(--pk-gold)">$ ${parseInt(f.total||0).toLocaleString('es-CL')}</span>
+      </div>
+    </div>
+    ${f.obs ? `<div style="margin-top:1rem;font-size:.82rem;color:var(--pk-muted)">Obs: ${f.obs}</div>` : ''}`;
+  openModal('modal-fin');
+}
+
+function totRow(label, val, esDescuento) {
+  const color = esDescuento ? 'var(--pk-red)' : 'var(--pk-green)';
+  return `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--pk-border);">
+    <span style="font-size:.82rem;color:var(--pk-muted)">${label}</span>
+    <span style="font-family:var(--font-mono);font-size:.82rem;color:${color}">${esDescuento?'- ':''}$ ${parseInt(val||0).toLocaleString('es-CL')}</span>
+  </div>`;
+}
+
+function df(label, val) {
+  return `<div>
+    <div style="font-size:.7rem;color:var(--pk-muted);letter-spacing:.08em;text-transform:uppercase">${label}</div>
+    <div style="font-size:.88rem;font-weight:500;margin-top:2px">${val||'—'}</div>
+  </div>`;
+}
+
+function marcarPagado() {
+  if (!finActual) return;
+  finActual.estado = 'Pagado';
+  finActual.fecha_pago = new Date().toISOString().slice(0,10);
+  closeModal('modal-fin');
+  renderListado();
+  showToast('✓ Finiquito marcado como Pagado');
+}
+
+function eliminarFiniquito() {
+  if (!finActual) return;
+  if (!confirm(`¿Eliminar el finiquito de ${finActual.nombre}?`)) return;
+  finiquitos = finiquitos.filter(f => f.id !== finActual.id);
+  closeModal('modal-fin');
+  renderListado();
+  showToast('Finiquito eliminado');
+  finActual = null;
+}
+
+// ── EXPORTAR ──────────────────────────────────────────────
+function exportar() {
+  const cols = ['RUT','Trabajador','Causal','Fecha Inicio','Fecha Término',
+    'Años Serv.','Sueldo Base','Remuneraciones','Feriado Prop.','Gratif. Prop.',
+    'Bonos Prop.','Indemnización','Aviso Previo','Otros Haberes',
+    'Desc. Anticipos','Otros Desc.','Total Finiquito','Estado','Fecha Pago','Obs'];
+  const rows = finiquitos.map(f => [
+    f.rut, f.nombre, f.causal_label, f.fecha_inicio, f.fecha_termino,
+    f.anios, f.sueldo_base, f.rem, f.feriado, f.gratif, f.bonos,
+    f.indem||0, f.aviso||0, f.otros_hab||0,
+    f.d_anticipos||0, f.d_otros||0, f.total,
+    f.estado, f.fecha_pago||'', f.obs||''
+  ]);
+  const csv = [cols,...rows].map(r => r.map(v=>`"${String(v||'').replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `PK_SpA_Finiquitos_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  showToast('Exportado correctamente');
+}
+
+// ── HELPERS ───────────────────────────────────────────────
+function formatPeso(n) { return '$ ' + Math.round(n||0).toLocaleString('es-CL'); }
+function openModal(id)  { document.getElementById(id).classList.add('show'); }
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+function showLoading(msg) {
+  document.getElementById('loading-msg').textContent = msg;
+  document.getElementById('loading').classList.add('show');
+}
+function hideLoading() { document.getElementById('loading').classList.remove('show'); }
+function showToast(msg, error=false) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show' + (error?' error':'');
+  clearTimeout(el._t);
+  el._t = setTimeout(()=>el.classList.remove('show'), 3500);
+}
+
+function irAPantallaPrincipal() {
+  const user = JSON.parse(sessionStorage.getItem('pk_user') || 'null');
+  if (!user) { window.location.href = 'pk_login.html'; return; }
+  const PERFILES = {
+    'RRHH':                  'pk_rrhh.html',
+    'Prevención de Riesgos': 'pk_prevencion.html',
+    'Gerencia Operaciones':  'pk_gerencia.html',
+    'Gerencia General':      'pk_gerencia.html',
+    'Supervisor':            'pk_supervisor.html',
+  };
+  window.location.href = PERFILES[user.perfil] || 'pk_login.html';
+}
+
+</script>
+</body>
+</html>

@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PK SpA — Panel Prevención de Riesgos</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --pk-black:#0a0c0f;--pk-panel:#161b22;--pk-panel2:#1c2128;
+    --pk-border:#21262d;--pk-border-light:#30363d;
+    --pk-gold:#c9a84c;--pk-gold-dim:#8a6f30;--pk-gold-glow:rgba(201,168,76,0.15);
+    --pk-red:#d9534f;--pk-green:#3fb950;--pk-text:#e6edf3;--pk-muted:#7d8590;
+    --pk-input-bg:#0d1117;
+    --accent:#f0883e;--accent-glow:rgba(240,136,62,0.12);
+    --font-head:'Rajdhani',sans-serif;--font-body:'Source Sans 3',sans-serif;
+    --sidebar-w:240px;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--pk-black);color:var(--pk-text);font-family:var(--font-body);font-size:14px;display:flex;min-height:100vh;}
+
+  .sidebar{width:var(--sidebar-w);background:var(--pk-panel);border-right:1px solid var(--pk-border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;}
+  .sidebar-logo{padding:1.5rem;border-bottom:1px solid var(--pk-border);display:flex;align-items:center;gap:12px;}
+  .s-hex{width:36px;height:36px;background:var(--pk-gold);clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .s-hex span{font-family:var(--font-head);font-weight:700;font-size:13px;color:var(--pk-black);}
+  .s-title{font-family:var(--font-head);font-size:.95rem;font-weight:600;letter-spacing:.06em;line-height:1.2;}
+  .s-sub{font-size:.7rem;color:var(--pk-muted);}
+  .sidebar-user{padding:1rem 1.5rem;border-bottom:1px solid var(--pk-border);background:var(--accent-glow);}
+  .su-label{font-size:.68rem;color:var(--pk-muted);letter-spacing:.12em;text-transform:uppercase;}
+  .su-name{font-family:var(--font-head);font-size:1rem;font-weight:600;color:var(--accent);margin-top:2px;}
+  .su-role{display:inline-block;font-size:.65rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--pk-black);background:var(--accent);padding:2px 8px;margin-top:4px;}
+  .sidebar-nav{flex:1;padding:1rem 0;overflow-y:auto;}
+  .nav-section{font-family:var(--font-head);font-size:.65rem;font-weight:600;letter-spacing:.18em;color:var(--pk-muted);text-transform:uppercase;padding:.75rem 1.5rem .4rem;}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:10px 1.5rem;cursor:pointer;transition:all .15s;border-left:3px solid transparent;font-size:.88rem;color:var(--pk-muted);}
+  .nav-item:hover{background:rgba(240,136,62,.06);color:var(--pk-text);}
+  .nav-item.active{background:var(--accent-glow);color:var(--accent);border-left-color:var(--accent);}
+  .nav-item .ni-icon{font-size:1rem;width:20px;text-align:center;}
+  .sidebar-footer{padding:1rem 1.5rem;border-top:1px solid var(--pk-border);}
+  .btn-logout{width:100%;background:transparent;border:1px solid var(--pk-border-light);color:var(--pk-muted);font-family:var(--font-head);font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:8px;cursor:pointer;transition:all .2s;}
+  .btn-logout:hover{border-color:var(--pk-red);color:var(--pk-red);}
+
+  .main{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;}
+  .topbar{background:var(--pk-panel);border-bottom:1px solid var(--pk-border);padding:0 2rem;height:56px;display:flex;align-items:center;gap:1rem;position:sticky;top:0;z-index:50;}
+  .topbar-title{font-family:var(--font-head);font-size:1.1rem;font-weight:600;letter-spacing:.06em;}
+  .topbar-actions{margin-left:auto;display:flex;gap:8px;}
+  .content{padding:2rem;flex:1;}
+
+  .btn{font-family:var(--font-head);font-size:.8rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:8px 18px;border:none;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:6px;}
+  .btn-primary{background:var(--accent);color:var(--pk-black);}
+  .btn-primary:hover{background:#ffaa66;}
+  .btn-secondary{background:transparent;border:1px solid var(--pk-border-light);color:var(--pk-muted);}
+  .btn-secondary:hover{border-color:var(--accent);color:var(--accent);}
+  .btn-gold{background:var(--pk-gold);color:var(--pk-black);}
+  .btn-gold:hover{background:#e0b85a;}
+
+  .panel{display:none;}
+  .panel.active{display:block;}
+
+  .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:2rem;}
+  .kpi-card{background:var(--pk-panel);border:1px solid var(--pk-border);padding:1.25rem;position:relative;overflow:hidden;}
+  .kpi-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+  .kpi-card.orange::after{background:var(--accent);}
+  .kpi-card.gold::after{background:var(--pk-gold);}
+  .kpi-card.green::after{background:var(--pk-green);}
+  .kpi-card.red::after{background:var(--pk-red);}
+  .kpi-label{font-size:.7rem;color:var(--pk-muted);letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px;}
+  .kpi-val{font-family:var(--font-head);font-size:2.2rem;font-weight:700;line-height:1;}
+  .kpi-card.orange .kpi-val{color:var(--accent);}
+  .kpi-card.gold .kpi-val{color:var(--pk-gold);}
+  .kpi-card.green .kpi-val{color:var(--pk-green);}
+  .kpi-card.red .kpi-val{color:var(--pk-red);}
+  .kpi-sub{font-size:.75rem;color:var(--pk-muted);margin-top:4px;}
+
+  .table-card{background:var(--pk-panel);border:1px solid var(--pk-border);margin-bottom:1.5rem;}
+  .table-header{padding:1rem 1.25rem;border-bottom:1px solid var(--pk-border);display:flex;align-items:center;gap:1rem;flex-wrap:wrap;}
+  .table-title{font-family:var(--font-head);font-size:.95rem;font-weight:600;letter-spacing:.06em;color:var(--accent);}
+  .search-box{background:var(--pk-input-bg);border:1px solid var(--pk-border-light);color:var(--pk-text);font-family:var(--font-body);font-size:.85rem;padding:7px 12px;outline:none;width:220px;transition:border-color .2s;}
+  .search-box:focus{border-color:var(--accent);}
+  .search-box::placeholder{color:var(--pk-muted);}
+
+  .table-wrap{overflow-x:auto;}
+  table{width:100%;border-collapse:collapse;}
+  thead tr{background:var(--pk-panel2);}
+  th{padding:10px 12px;text-align:left;font-family:var(--font-head);font-size:.7rem;font-weight:600;letter-spacing:.12em;color:var(--pk-muted);text-transform:uppercase;border-bottom:1px solid var(--pk-border);white-space:nowrap;}
+  td{padding:10px 12px;font-size:.85rem;border-bottom:1px solid var(--pk-border);vertical-align:middle;}
+  tr:hover td{background:rgba(240,136,62,.04);}
+
+  .action-btn{background:none;border:1px solid var(--pk-border-light);color:var(--pk-muted);padding:4px 10px;cursor:pointer;font-size:.75rem;font-family:var(--font-head);font-weight:600;letter-spacing:.08em;text-transform:uppercase;transition:all .15s;margin-right:4px;}
+  .action-btn:hover{border-color:var(--accent);color:var(--accent);}
+
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;display:none;align-items:flex-start;justify-content:center;padding:2rem;overflow-y:auto;backdrop-filter:blur(4px);}
+  .modal-overlay.show{display:flex;}
+  .modal{background:var(--pk-panel);border:1px solid var(--pk-border);width:100%;max-width:700px;margin:auto;position:relative;animation:modalIn .25s ease both;}
+  @keyframes modalIn{from{opacity:0;transform:translateY(-16px);}to{opacity:1;transform:translateY(0);}}
+  .modal-header{padding:1.25rem 1.5rem;border-bottom:1px solid var(--pk-border);display:flex;align-items:center;gap:1rem;background:linear-gradient(90deg,var(--accent-glow),transparent);}
+  .modal-title{font-family:var(--font-head);font-size:1rem;font-weight:600;letter-spacing:.06em;color:var(--accent);}
+  .modal-close{margin-left:auto;background:none;border:none;color:var(--pk-muted);font-size:1.3rem;cursor:pointer;transition:color .15s;}
+  .modal-close:hover{color:var(--pk-red);}
+  .modal-body{padding:1.5rem;max-height:75vh;overflow-y:auto;}
+  .modal-footer{padding:1rem 1.5rem;border-top:1px solid var(--pk-border);display:flex;gap:8px;justify-content:flex-end;}
+
+  .form-row{margin-bottom:1rem;}
+  .form-row label{display:block;font-family:var(--font-head);font-size:.72rem;font-weight:600;letter-spacing:.12em;color:var(--pk-muted);text-transform:uppercase;margin-bottom:6px;}
+  .form-row input,.form-row select,.form-row textarea{width:100%;background:var(--pk-input-bg);border:1px solid var(--pk-border-light);color:var(--pk-text);font-family:var(--font-body);font-size:.88rem;padding:9px 12px;outline:none;transition:border-color .2s;}
+  .form-row input:focus,.form-row select:focus,.form-row textarea:focus{border-color:var(--accent);}
+  .form-row textarea{resize:vertical;min-height:80px;}
+  .form-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+
+  /* EPP CHECKLIST */
+  .epp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:1rem;}
+  .epp-item{background:var(--pk-panel2);border:1px solid var(--pk-border);padding:10px;display:flex;align-items:center;gap:8px;cursor:pointer;transition:all .15s;}
+  .epp-item:hover{border-color:var(--accent);}
+  .epp-item.checked{background:rgba(240,136,62,.08);border-color:var(--accent);}
+  .epp-item input{accent-color:var(--accent);}
+  .epp-item label{font-size:.82rem;cursor:pointer;line-height:1.3;}
+
+  /* INCIDENTE BADGE */
+  .inc-badge{display:inline-block;font-family:var(--font-head);font-size:.65rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:3px 8px;border:1px solid;}
+  .inc-badge.leve{color:var(--pk-gold);border-color:var(--pk-gold);background:var(--pk-gold-glow);}
+  .inc-badge.grave{color:var(--pk-red);border-color:var(--pk-red);background:rgba(217,83,79,.08);}
+  .inc-badge.fatalf{color:#ff6b6b;border-color:#ff6b6b;background:rgba(255,107,107,.08);}
+
+  /* UPLOAD */
+  .upload-zone{border:1px dashed var(--pk-border-light);background:var(--pk-input-bg);padding:1.5rem;text-align:center;cursor:pointer;transition:all .2s;position:relative;}
+  .upload-zone:hover{border-color:var(--accent);background:var(--accent-glow);}
+  .upload-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+  .upload-zone-label{font-family:var(--font-head);font-size:.85rem;font-weight:600;color:var(--accent);letter-spacing:.1em;text-transform:uppercase;}
+  .upload-zone-hint{font-size:.75rem;color:var(--pk-muted);margin-top:4px;}
+
+  .loading-row td{text-align:center;color:var(--pk-muted);padding:2rem;font-size:.85rem;}
+
+  .toast{position:fixed;bottom:2rem;right:2rem;background:var(--pk-panel);border:1px solid var(--pk-border);border-left:3px solid var(--pk-green);padding:12px 20px;font-size:.88rem;color:var(--pk-green);z-index:999;display:none;}
+  .toast.show{display:block;}
+  .toast.error{border-left-color:var(--pk-red);color:var(--pk-red);}
+
+  .obs-card{background:var(--pk-panel2);border:1px solid var(--pk-border);border-left:3px solid var(--accent);padding:12px 16px;margin-bottom:8px;}
+  .obs-fecha{font-size:.72rem;color:var(--pk-muted);}
+  .obs-texto{font-size:.88rem;margin-top:4px;}
+  .obs-autor{font-size:.72rem;color:var(--accent);margin-top:4px;font-family:var(--font-head);letter-spacing:.05em;}
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="s-hex"><span>PK</span></div>
+    <div><div class="s-title">PK SpA</div><div class="s-sub">Sistema RRHH</div></div>
+  </div>
+  <div class="sidebar-user">
+    <div class="su-label">Usuario activo</div>
+    <div class="su-name" id="sb-nombre">—</div>
+    <div class="su-role">Prevención de Riesgos</div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">Principal</div>
+    <div class="nav-item active" onclick="showPanel('dashboard')"><span class="ni-icon">📊</span> Dashboard</div>
+    <div class="nav-item" onclick="showPanel('trabajadores')"><span class="ni-icon">👥</span> Trabajadores</div>
+    <div class="nav-section">Gestión Prevención</div>
+    <div class="nav-item" onclick="showPanel('certificados')"><span class="ni-icon">📜</span> Certificados y Cursos</div>
+    <div class="nav-item" onclick="showPanel('epp')"><span class="ni-icon">🦺</span> EPP Entregado</div>
+    <div class="nav-item" onclick="showPanel('incidentes')"><span class="ni-icon">⚠️</span> Accidentes / Incidentes</div>
+    <div class="nav-item" onclick="showPanel('observaciones')"><span class="ni-icon">📝</span> Observaciones</div>
+  </nav>
+  <div class="sidebar-footer">
+    <a class="btn-logout" href="#" onclick="irAPantallaPrincipal()" style="display:block;text-align:center;text-decoration:none;margin-bottom:8px;border-color:var(--pk-gold);color:var(--pk-gold)">🏠 Pantalla Principal</a>
+    <button class="btn-logout" onclick="logout()">⏻ Cerrar Sesión</button>
+  </div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title" id="topbar-title">Dashboard Prevención</div>
+    <div class="topbar-actions">
+      <button class="btn" style="background:var(--accent);color:var(--pk-black);" onclick="window.location.href='pk_carga_masiva.html'">📦 Carga Masiva</button>
+      <button class="btn btn-secondary" onclick="cargarDatos()">↻ Actualizar</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- DASHBOARD -->
+    <div class="panel active" id="panel-dashboard">
+      <div class="kpi-grid">
+        <div class="kpi-card orange"><div class="kpi-label">Total Guardias</div><div class="kpi-val" id="kpi-total">—</div></div>
+        <div class="kpi-card gold"><div class="kpi-label">Cert. Por Vencer</div><div class="kpi-val" id="kpi-cert-vencer">—</div><div class="kpi-sub">Próx. 30 días</div></div>
+        <div class="kpi-card red"><div class="kpi-label">Incidentes Mes</div><div class="kpi-val" id="kpi-incidentes">—</div></div>
+        <div class="kpi-card green"><div class="kpi-label">EPP Completo</div><div class="kpi-val" id="kpi-epp">—</div><div class="kpi-sub">% con kit completo</div></div>
+      </div>
+      <div class="table-card">
+        <div class="table-header"><div class="table-title">Trabajadores — Vista Prevención</div></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Trabajador</th><th>RUT</th><th>OS-10 Venc.</th><th>Exam. Psic.</th><th>Exam. Físico</th><th>EPP</th><th>Acciones</th></tr></thead>
+            <tbody id="tbody-dashboard"><tr class="loading-row"><td colspan="7">Cargando...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TRABAJADORES -->
+    <div class="panel" id="panel-trabajadores">
+      <div class="table-card">
+        <div class="table-header">
+          <div class="table-title">Ficha de Trabajadores (Solo Lectura)</div>
+          <input class="search-box" id="search-trab" placeholder="🔍 Buscar..." oninput="filtrarTrabajadores()">
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Nombre</th><th>RUT</th><th>Categoría</th><th>OS-10 Venc.</th><th>Examen Psic.</th><th>Examen Físico</th><th>Acciones</th></tr></thead>
+            <tbody id="tbody-trabajadores"><tr class="loading-row"><td colspan="7">Cargando...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- CERTIFICADOS -->
+    <div class="panel" id="panel-certificados">
+      <div class="table-card">
+        <div class="table-header">
+          <div class="table-title">Registrar Certificado / Curso</div>
+        </div>
+        <div style="padding:1.5rem;">
+          <div class="form-grid-2">
+            <div class="form-row">
+              <label>Trabajador *</label>
+              <select id="cert-trabajador"><option value="">— Seleccione —</option></select>
+            </div>
+            <div class="form-row">
+              <label>Tipo de Certificado *</label>
+              <select id="cert-tipo">
+                <option value="">— Seleccione —</option>
+                <option>OS-10 Renovación</option>
+                <option>Primeros Auxilios</option>
+                <option>Prevención de Incendios</option>
+                <option>Manejo Defensivo</option>
+                <option>Uso de CCTV</option>
+                <option>Control de Acceso</option>
+                <option>RCP Avanzado</option>
+                <option>Seguridad Vial</option>
+                <option>Otro</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <label>Institución Certificadora</label>
+              <input type="text" id="cert-inst" placeholder="Ej: ACHS, IST, OTEC...">
+            </div>
+            <div class="form-row">
+              <label>Fecha de Realización *</label>
+              <input type="date" id="cert-fecha">
+            </div>
+            <div class="form-row">
+              <label>Fecha de Vencimiento</label>
+              <input type="date" id="cert-venc">
+            </div>
+            <div class="form-row">
+              <label>N° de Certificado</label>
+              <input type="text" id="cert-num" placeholder="Código o folio del certificado">
+            </div>
+          </div>
+          <div class="form-row">
+            <label>Adjuntar Certificado (PDF/Imagen)</label>
+            <div class="upload-zone">
+              <input type="file" id="cert-file" accept=".pdf,.jpg,.png" onchange="mostrarArchivo('cert-file-name',this)">
+              <div class="upload-zone-label">📎 Seleccionar Archivo</div>
+              <div class="upload-zone-hint" id="cert-file-name">PDF o imagen — Máx. 5 MB</div>
+            </div>
+          </div>
+          <div class="form-row">
+            <label>Observaciones</label>
+            <textarea id="cert-obs" placeholder="Notas adicionales..."></textarea>
+          </div>
+          <button class="btn btn-primary" onclick="guardarCertificado()">💾 Registrar Certificado</button>
+        </div>
+      </div>
+
+      <!-- Historial certificados -->
+      <div class="table-card">
+        <div class="table-header"><div class="table-title">Certificados Registrados</div></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Trabajador</th><th>Certificado</th><th>Institución</th><th>Fecha</th><th>Vencimiento</th><th>Estado</th></tr></thead>
+            <tbody id="tbody-certs">
+              <tr><td>Juan González</td><td>OS-10 Renovación</td><td>ACHS</td><td>2024-12-01</td><td>2025-12-01</td><td><span class="inc-badge leve">Vigente</span></td></tr>
+              <tr><td>María Rodríguez</td><td>Primeros Auxilios</td><td>Cruz Roja</td><td>2025-01-15</td><td>2026-01-15</td><td><span class="inc-badge leve">Vigente</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- EPP -->
+    <div class="panel" id="panel-epp">
+      <div class="table-card">
+        <div class="table-header"><div class="table-title">Registro de EPP Entregado</div></div>
+        <div style="padding:1.5rem;">
+          <div class="form-row">
+            <label>Trabajador *</label>
+            <select id="epp-trabajador"><option value="">— Seleccione —</option></select>
+          </div>
+          <div class="form-row">
+            <label>Fecha de Entrega *</label>
+            <input type="date" id="epp-fecha">
+          </div>
+          <div class="form-row"><label>Equipos Entregados *</label></div>
+          <div class="epp-grid">
+            <div class="epp-item" onclick="toggleEpp(this)"><input type="checkbox" value="Casco seguridad"><label>🪖 Casco de Seguridad</label></div>
+            <div class="epp-item" onclick="toggleEpp(this)"><input type="checkbox" value="Chaleco reflectante"><label>🦺 Chaleco Reflectante</label></div>
+            <div class="epp-item" onclick="toggleEpp(this)"><input type="checkbox" value="Zapatos seguridad"><label>👢 Zapatos de Seguridad</label></div>
+            <div class="epp-item" onclick="toggleEpp(this)"><input type="checkbox" value="Linterna"><label>🔦 Linterna</label></div>
+            <div class="epp-item" onclick="toggleEpp(this)"><input type="checkbox" value="Radio comunicación"><label>📻 Radio Comunicación</label></div>
+            <div class="epp-item" onclick="toggleEpp(this)"><input type="checkbox" value="Garrote/bastón"><label>🏑 Bastón de Mando</label></div>
+            <div class="epp-item" onclick="toggleEpp(this)"><input type="checkbox" value="Carnet identificación"><label>🪪 Carnet Identificación</label></div>
+            <div class="epp-item" onclick="toggleEpp(this)"><input type="checkbox" value="Uniforme completo"><label>👔 Uniforme Completo</label></div>
+            <div class="epp-item" onclick="toggleEpp(this)"><input type="checkbox" value="Guantes"><label>🧤 Guantes</label></div>
+          </div>
+          <div class="form-row">
+            <label>Otros EPP / Observaciones</label>
+            <textarea id="epp-obs" placeholder="Indique cualquier equipo adicional entregado..."></textarea>
+          </div>
+          <div class="form-row">
+            <label>Firma Digital (nombre completo del receptor)</label>
+            <input type="text" id="epp-firma" placeholder="El guardia ingresa su nombre como confirmación de recepción">
+          </div>
+          <button class="btn btn-primary" onclick="guardarEPP()">💾 Registrar Entrega EPP</button>
+        </div>
+      </div>
+
+      <div class="table-card">
+        <div class="table-header"><div class="table-title">Historial de Entregas EPP</div></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Trabajador</th><th>Fecha</th><th>EPP Entregado</th><th>Firma</th></tr></thead>
+            <tbody id="tbody-epp">
+              <tr><td>Juan González</td><td>2025-03-01</td><td>Casco, Chaleco, Zapatos, Linterna</td><td>✓ Juan Carlos González</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ACCIDENTES / INCIDENTES -->
+    <div class="panel" id="panel-incidentes">
+      <div class="table-card">
+        <div class="table-header"><div class="table-title">Registrar Accidente / Incidente</div></div>
+        <div style="padding:1.5rem;">
+          <div class="form-grid-2">
+            <div class="form-row">
+              <label>Trabajador Involucrado *</label>
+              <select id="inc-trabajador"><option value="">— Seleccione —</option></select>
+            </div>
+            <div class="form-row">
+              <label>Tipo de Evento *</label>
+              <select id="inc-tipo">
+                <option value="">— Seleccione —</option>
+                <option>Accidente laboral con lesión leve</option>
+                <option>Accidente laboral con lesión grave</option>
+                <option>Accidente laboral fatal</option>
+                <option>Incidente (sin lesión)</option>
+                <option>Cuasi accidente</option>
+                <option>Enfermedad profesional</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <label>Fecha del Evento *</label>
+              <input type="date" id="inc-fecha">
+            </div>
+            <div class="form-row">
+              <label>Hora del Evento</label>
+              <input type="time" id="inc-hora">
+            </div>
+            <div class="form-row">
+              <label>Instalación / Lugar</label>
+              <input type="text" id="inc-lugar" placeholder="Ej: Planta Weir Minerals, Bodega 3">
+            </div>
+            <div class="form-row">
+              <label>Días de Licencia Médica</label>
+              <input type="number" id="inc-dias" placeholder="0" min="0">
+            </div>
+          </div>
+          <div class="form-row">
+            <label>Descripción del Evento *</label>
+            <textarea id="inc-desc" placeholder="Describa detalladamente cómo ocurrió el accidente o incidente..." style="min-height:100px;"></textarea>
+          </div>
+          <div class="form-row">
+            <label>Medidas Correctivas Tomadas</label>
+            <textarea id="inc-medidas" placeholder="Indique las acciones tomadas para prevenir recurrencia..."></textarea>
+          </div>
+          <div class="form-row">
+            <label>Adjuntar Documentación (Informe, Fotos)</label>
+            <div class="upload-zone">
+              <input type="file" id="inc-file" accept=".pdf,.jpg,.png" multiple onchange="mostrarArchivo('inc-file-name',this)">
+              <div class="upload-zone-label">📎 Adjuntar Archivos</div>
+              <div class="upload-zone-hint" id="inc-file-name">PDF o imágenes</div>
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="guardarIncidente()">⚠ Registrar Evento</button>
+        </div>
+      </div>
+
+      <div class="table-card">
+        <div class="table-header"><div class="table-title">Historial de Accidentes e Incidentes</div></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Fecha</th><th>Trabajador</th><th>Tipo</th><th>Lugar</th><th>Días Lic.</th><th>Gravedad</th></tr></thead>
+            <tbody id="tbody-incidentes">
+              <tr><td>2025-02-14</td><td>Pedro Muñoz</td><td>Accidente laboral con lesión leve</td><td>Planta Soprole</td><td>3</td><td><span class="inc-badge leve">Leve</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- OBSERVACIONES -->
+    <div class="panel" id="panel-observaciones">
+      <div class="table-card">
+        <div class="table-header"><div class="table-title">Registrar Observación de Seguridad</div></div>
+        <div style="padding:1.5rem;">
+          <div class="form-grid-2">
+            <div class="form-row">
+              <label>Trabajador *</label>
+              <select id="obs-trabajador"><option value="">— Seleccione —</option></select>
+            </div>
+            <div class="form-row">
+              <label>Tipo de Observación *</label>
+              <select id="obs-tipo">
+                <option value="">— Seleccione —</option>
+                <option>Conducta segura positiva</option>
+                <option>Conducta de riesgo</option>
+                <option>Uso incorrecto de EPP</option>
+                <option>Incumplimiento de procedimiento</option>
+                <option>Condición insegura reportada</option>
+                <option>Reconocimiento por buenas prácticas</option>
+                <option>Otra</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <label>Fecha *</label>
+              <input type="date" id="obs-fecha">
+            </div>
+            <div class="form-row">
+              <label>Instalación / Lugar</label>
+              <input type="text" id="obs-lugar" placeholder="Ej: Cliente Air Liquide">
+            </div>
+          </div>
+          <div class="form-row">
+            <label>Detalle de la Observación *</label>
+            <textarea id="obs-detalle" placeholder="Describa la observación realizada..." style="min-height:100px;"></textarea>
+          </div>
+          <div class="form-row">
+            <label>Acción Recomendada / Tomada</label>
+            <textarea id="obs-accion" placeholder="¿Qué acción se recomendó o se tomó?"></textarea>
+          </div>
+          <button class="btn btn-primary" onclick="guardarObservacion()">📝 Registrar Observación</button>
+        </div>
+      </div>
+
+      <div class="table-card">
+        <div class="table-header">
+          <div class="table-title">Historial de Observaciones</div>
+          <input class="search-box" id="search-obs" placeholder="🔍 Buscar..." oninput="filtrarObs()">
+        </div>
+        <div style="padding:1.25rem;" id="obs-historial">
+          <div class="obs-card">
+            <div class="obs-fecha">14/02/2025 · Planta Soprole · <strong>Conducta de riesgo</strong></div>
+            <div class="obs-texto">Guardia observado sin usar casco en zona de tránsito de maquinaria pesada.</div>
+            <div class="obs-autor">Registrado por: Prevención PK SpA</div>
+          </div>
+          <div class="obs-card">
+            <div class="obs-fecha">01/03/2025 · Air Liquide · <strong>Conducta segura positiva</strong></div>
+            <div class="obs-texto">Guardia reportó proactivamente una condición insegura en el acceso norte.</div>
+            <div class="obs-autor">Registrado por: Prevención PK SpA</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL FICHA (solo lectura) -->
+<div class="modal-overlay" id="modal-ficha">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="mf-title">Ficha del Trabajador</div>
+      <button class="modal-close" onclick="closeModal('modal-ficha')">✕</button>
+    </div>
+    <div class="modal-body" id="mf-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-ficha')">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbzr1LbD5OeV0lEn8jxafJUb1jjSxWyVL9pHMiJDA6NxoybaWLkloG_rxOKLrUBKOpyn/exec';
+let allTrabajadores = [];
+
+document.addEventListener('DOMContentLoaded', () => {
+  const user = JSON.parse(sessionStorage.getItem('pk_user') || 'null');
+  if (!user || user.perfil !== 'Prevención de Riesgos') {
+    window.location.href = 'pk_login.html'; return;
+  }
+  document.getElementById('sb-nombre').textContent = user.nombre;
+  cargarDatos();
+});
+
+function showPanel(id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const panel = document.getElementById('panel-' + id);
+  if (panel) panel.classList.add('active');
+  const nav = document.querySelector(`[onclick="showPanel('${id}')"]`);
+  if (nav) nav.classList.add('active');
+  const titles = {
+    dashboard:     'Dashboard Prevención',
+    trabajadores:  'Trabajadores (Solo Lectura)',
+    certificados:  'Certificados y Cursos',
+    epp:           'EPP Entregado',
+    incidentes:    'Accidentes / Incidentes',
+    observaciones: 'Observaciones de Seguridad'
+  };
+  document.getElementById('topbar-title').textContent = titles[id] || id;
+}
+
+function logout() { sessionStorage.removeItem('pk_user'); window.location.href = 'pk_login.html'; }
+
+async function cargarDatos() {
+  try {
+    const resp = await fetch(`${GAS_URL}?action=getTrabajadores`);
+    const data = await resp.json();
+    allTrabajadores = data.trabajadores || [];
+  } catch(e) {
+    allTrabajadores = [
+      { ref:'PK-20250317-123456', nombre:'Juan Carlos González Pérez', rut:'12.345.678-9', os10_cat:'OS-10 Categoría A', os10_venc:'2025-12-31', exam_psico:'Aprobado — Vigente', exam_fisico:'Aprobado — Vigente' },
+      { ref:'PK-20250315-234567', nombre:'María Isabel Rodríguez Soto', rut:'11.234.567-8', os10_cat:'OS-10 Categoría B', os10_venc:'2025-06-30', exam_psico:'Aprobado — Por renovar', exam_fisico:'Aprobado — Vigente' },
+      { ref:'PK-20250310-345678', nombre:'Pedro Antonio Muñoz Lagos', rut:'10.345.678-7', os10_cat:'OS-10 Categoría A', os10_venc:'2026-03-31', exam_psico:'Aprobado — Vigente', exam_fisico:'Aprobado — Vigente' },
+    ];
+  }
+  document.getElementById('kpi-total').textContent = allTrabajadores.length;
+  document.getElementById('kpi-cert-vencer').textContent = 2;
+  document.getElementById('kpi-incidentes').textContent = 1;
+  document.getElementById('kpi-epp').textContent = '80%';
+  renderDashboard();
+  renderTrabajadores();
+  poblarSelects();
+}
+
+function renderDashboard() {
+  document.getElementById('tbody-dashboard').innerHTML = allTrabajadores.map(t => `
+    <tr>
+      <td>${t.nombre}</td>
+      <td style="font-family:var(--font-head)">${t.rut}</td>
+      <td style="font-size:.8rem;color:var(--pk-muted)">${t.os10_venc || '—'}</td>
+      <td><span style="font-size:.8rem;color:${t.exam_psico?.includes('renovar') ? 'var(--pk-orange)' : 'var(--pk-green)'}">${t.exam_psico?.split('—')[0] || '—'}</span></td>
+      <td><span style="font-size:.8rem;color:${t.exam_fisico?.includes('renovar') ? 'var(--pk-orange)' : 'var(--pk-green)'}">${t.exam_fisico?.split('—')[0] || '—'}</span></td>
+      <td><span style="font-size:.8rem;color:var(--pk-green)">✓</span></td>
+      <td><button class="action-btn" onclick="verFicha('${t.ref}')">Ver Ficha</button></td>
+    </tr>
+  `).join('');
+}
+
+function renderTrabajadores() {
+  document.getElementById('tbody-trabajadores').innerHTML = allTrabajadores.map(t => `
+    <tr>
+      <td>${t.nombre}</td>
+      <td style="font-family:var(--font-head)">${t.rut}</td>
+      <td style="font-size:.8rem">${t.os10_cat || '—'}</td>
+      <td style="font-size:.8rem;color:var(--pk-muted)">${t.os10_venc || '—'}</td>
+      <td style="font-size:.8rem">${t.exam_psico || '—'}</td>
+      <td style="font-size:.8rem">${t.exam_fisico || '—'}</td>
+      <td><button class="action-btn" onclick="verFicha('${t.ref}')">Ver</button></td>
+    </tr>
+  `).join('');
+}
+
+function filtrarTrabajadores() {
+  const q = document.getElementById('search-trab').value.toLowerCase();
+  const filtrado = allTrabajadores.filter(t => t.nombre?.toLowerCase().includes(q) || t.rut?.includes(q));
+  document.getElementById('tbody-trabajadores').innerHTML = filtrado.map(t => `
+    <tr>
+      <td>${t.nombre}</td><td>${t.rut}</td><td>${t.os10_cat||'—'}</td>
+      <td>${t.os10_venc||'—'}</td><td>${t.exam_psico||'—'}</td><td>${t.exam_fisico||'—'}</td>
+      <td><button class="action-btn" onclick="verFicha('${t.ref}')">Ver</button></td>
+    </tr>
+  `).join('');
+}
+
+function poblarSelects() {
+  const opts = '<option value="">— Seleccione —</option>' + allTrabajadores.map(t => `<option value="${t.ref}">${t.nombre} (${t.rut})</option>`).join('');
+  ['cert-trabajador','epp-trabajador','inc-trabajador','obs-trabajador'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = opts;
+  });
+}
+
+function verFicha(ref) {
+  const t = allTrabajadores.find(x => x.ref === ref);
+  if (!t) return;
+  document.getElementById('mf-title').textContent = `Ficha — ${t.nombre}`;
+  document.getElementById('mf-body').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;">
+      ${[['Nombre',t.nombre],['RUT',t.rut],['Categoría OS-10',t.os10_cat],['OS-10 Vence',t.os10_venc],['Examen Psic.',t.exam_psico],['Examen Físico',t.exam_fisico]]
+        .map(([l,v])=>`<div><div style="font-size:.72rem;color:var(--pk-muted)">${l}</div><div style="font-size:.9rem;font-weight:500">${v||'—'}</div></div>`).join('')}
+    </div>
+    <p style="font-size:.8rem;color:var(--pk-muted);margin-top:1rem;">Vista de solo lectura. Modificaciones disponibles en panel de RR.HH.</p>
+  `;
+  openModal('modal-ficha');
+}
+
+function toggleEpp(el) {
+  el.classList.toggle('checked');
+  el.querySelector('input').checked = el.classList.contains('checked');
+}
+
+function guardarCertificado() {
+  if (!document.getElementById('cert-trabajador').value) { showToast('Seleccione un trabajador', true); return; }
+  if (!document.getElementById('cert-tipo').value) { showToast('Seleccione tipo de certificado', true); return; }
+  showToast('✓ Certificado registrado correctamente');
+}
+
+function guardarEPP() {
+  if (!document.getElementById('epp-trabajador').value) { showToast('Seleccione un trabajador', true); return; }
+  const checked = document.querySelectorAll('.epp-item.checked');
+  if (!checked.length) { showToast('Seleccione al menos un EPP', true); return; }
+  const firma = document.getElementById('epp-firma').value.trim();
+  if (!firma) { showToast('Ingrese la firma del receptor', true); return; }
+  showToast('✓ Entrega de EPP registrada');
+}
+
+function guardarIncidente() {
+  if (!document.getElementById('inc-trabajador').value || !document.getElementById('inc-tipo').value) {
+    showToast('Complete los campos obligatorios', true); return;
+  }
+  showToast('⚠ Incidente registrado. Se notificará a Gerencia.');
+}
+
+function guardarObservacion() {
+  if (!document.getElementById('obs-trabajador').value || !document.getElementById('obs-detalle').value.trim()) {
+    showToast('Complete los campos obligatorios', true); return;
+  }
+  const tipo = document.getElementById('obs-tipo').value;
+  const detalle = document.getElementById('obs-detalle').value;
+  const lugar = document.getElementById('obs-lugar').value;
+  const hoy = new Date().toLocaleDateString('es-CL');
+  const user = JSON.parse(sessionStorage.getItem('pk_user') || '{}');
+  const nuevo = document.createElement('div');
+  nuevo.className = 'obs-card';
+  nuevo.innerHTML = `<div class="obs-fecha">${hoy} · ${lugar||'Sin lugar'} · <strong>${tipo}</strong></div>
+    <div class="obs-texto">${detalle}</div>
+    <div class="obs-autor">Registrado por: ${user.nombre||'Prevención'}</div>`;
+  document.getElementById('obs-historial').prepend(nuevo);
+  document.getElementById('obs-detalle').value = '';
+  document.getElementById('obs-accion').value = '';
+  showToast('✓ Observación registrada');
+}
+
+function filtrarObs() {}
+function mostrarArchivo(targetId, input) {
+  const el = document.getElementById(targetId);
+  if (el && input.files.length) el.textContent = Array.from(input.files).map(f=>f.name).join(', ');
+}
+function openModal(id) { document.getElementById(id).classList.add('show'); }
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+function showToast(msg, error=false) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.className = 'toast show' + (error?' error':'');
+  clearTimeout(el._t); el._t = setTimeout(()=>el.classList.remove('show'),3000);
+}
+
+function irAPantallaPrincipal() {
+  const user = JSON.parse(sessionStorage.getItem('pk_user') || 'null');
+  if (!user) { window.location.href = 'pk_login.html'; return; }
+  const PERFILES = {
+    'RRHH':                  'pk_rrhh.html',
+    'Prevención de Riesgos': 'pk_prevencion.html',
+    'Gerencia Operaciones':  'pk_gerencia.html',
+    'Gerencia General':      'pk_gerencia.html',
+    'Supervisor':            'pk_supervisor.html',
+  };
+  window.location.href = PERFILES[user.perfil] || 'pk_login.html';
+}
+
+</script>
+</body>
+</html>

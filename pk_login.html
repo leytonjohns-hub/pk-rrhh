@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PK SpA — Acceso al Sistema RRHH</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --pk-black: #0a0c0f;
+    --pk-dark: #111418;
+    --pk-panel: #161b22;
+    --pk-border: #21262d;
+    --pk-border-light: #30363d;
+    --pk-gold: #c9a84c;
+    --pk-gold-dim: #8a6f30;
+    --pk-gold-glow: rgba(201,168,76,0.15);
+    --pk-red: #d9534f;
+    --pk-green: #3fb950;
+    --pk-text: #e6edf3;
+    --pk-muted: #7d8590;
+    --font-head: 'Rajdhani', sans-serif;
+    --font-body: 'Source Sans 3', sans-serif;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--pk-black);
+    color: var(--pk-text);
+    font-family: var(--font-body);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Animated background grid */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      repeating-linear-gradient(0deg, transparent, transparent 59px, rgba(201,168,76,0.04) 60px),
+      repeating-linear-gradient(90deg, transparent, transparent 59px, rgba(201,168,76,0.04) 60px);
+    animation: gridMove 20s linear infinite;
+    pointer-events: none;
+  }
+
+  @keyframes gridMove {
+    from { background-position: 0 0; }
+    to { background-position: 60px 60px; }
+  }
+
+  /* Diagonal accent */
+  body::after {
+    content: '';
+    position: fixed;
+    top: -200px;
+    right: -200px;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(201,168,76,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .login-wrap {
+    position: relative;
+    z-index: 10;
+    width: 100%;
+    max-width: 460px;
+    padding: 24px;
+    animation: fadeUp 0.6s ease both;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* LOGO */
+  .logo-block {
+    text-align: center;
+    margin-bottom: 2.5rem;
+  }
+
+  .logo-hex {
+    width: 72px;
+    height: 72px;
+    background: var(--pk-gold);
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+    position: relative;
+  }
+
+  .logo-hex::after {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    background: var(--pk-gold-glow);
+    z-index: -1;
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 0.3; transform: scale(1); }
+    50% { opacity: 0.8; transform: scale(1.08); }
+  }
+
+  .logo-hex span {
+    font-family: var(--font-head);
+    font-weight: 700;
+    font-size: 26px;
+    color: var(--pk-black);
+    letter-spacing: 2px;
+  }
+
+  .logo-title {
+    font-family: var(--font-head);
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--pk-text);
+    text-transform: uppercase;
+    line-height: 1.2;
+  }
+
+  .logo-sub {
+    font-size: 0.78rem;
+    color: var(--pk-muted);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  /* LOGIN CARD */
+  .login-card {
+    background: var(--pk-panel);
+    border: 1px solid var(--pk-border);
+    padding: 2.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .login-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, var(--pk-gold), transparent);
+  }
+
+  .login-card-title {
+    font-family: var(--font-head);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    color: var(--pk-gold);
+    text-transform: uppercase;
+    margin-bottom: 1.75rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .login-card-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--pk-border);
+  }
+
+  .field {
+    margin-bottom: 1.25rem;
+  }
+
+  .field label {
+    display: block;
+    font-family: var(--font-head);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    color: var(--pk-muted);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .field input {
+    width: 100%;
+    background: #0d1117;
+    border: 1px solid var(--pk-border-light);
+    color: var(--pk-text);
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    padding: 12px 16px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .field input:focus {
+    border-color: var(--pk-gold-dim);
+    box-shadow: 0 0 0 3px var(--pk-gold-glow);
+  }
+
+  .field input.error {
+    border-color: var(--pk-red);
+    box-shadow: 0 0 0 3px rgba(217,83,79,0.1);
+  }
+
+  .btn-login {
+    width: 100%;
+    background: var(--pk-gold);
+    color: var(--pk-black);
+    font-family: var(--font-head);
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 14px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 0.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-login::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0);
+    transition: background 0.2s;
+  }
+
+  .btn-login:hover { background: #e0b85a; }
+  .btn-login:active { transform: scale(0.99); }
+
+  .btn-login:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .login-error {
+    background: rgba(217,83,79,0.1);
+    border: 1px solid rgba(217,83,79,0.3);
+    border-left: 3px solid var(--pk-red);
+    color: #f85149;
+    font-size: 0.85rem;
+    padding: 10px 14px;
+    margin-top: 1rem;
+    display: none;
+  }
+
+  .login-error.show { display: block; }
+
+  .login-loading {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    color: var(--pk-muted);
+    font-size: 0.85rem;
+    margin-top: 1rem;
+  }
+
+  .login-loading.show { display: flex; }
+
+  .spin {
+    width: 18px; height: 18px;
+    border: 2px solid var(--pk-border-light);
+    border-top-color: var(--pk-gold);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Security badge */
+  .security-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 1.5rem;
+    font-size: 0.72rem;
+    color: var(--pk-muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .security-badge::before, .security-badge::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--pk-border);
+  }
+
+  /* Perfiles indicador */
+  .perfiles {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin-top: 1.5rem;
+  }
+
+  .perfil-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border: 1px solid var(--pk-border);
+    font-size: 0.72rem;
+    color: var(--pk-muted);
+    letter-spacing: 0.05em;
+  }
+
+  .perfil-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--pk-border-light);
+    flex-shrink: 0;
+  }
+
+  .perfil-dot.rrhh { background: #58a6ff; }
+  .perfil-dot.prev { background: #f0883e; }
+  .perfil-dot.oper { background: #3fb950; }
+  .perfil-dot.gg { background: var(--pk-gold); }
+
+  /* Version tag */
+  .version-tag {
+    text-align: center;
+    margin-top: 2rem;
+    font-size: 0.68rem;
+    color: #3d4450;
+    letter-spacing: 0.1em;
+  }
+</style>
+</head>
+<body>
+
+<div class="login-wrap">
+
+  <div class="logo-block">
+    <div class="logo-hex"><span>PK</span></div>
+    <div class="logo-title">PK SpA</div>
+    <div class="logo-sub">Sistema de Recursos Humanos</div>
+  </div>
+
+  <div class="login-card">
+    <div class="login-card-title">Acceso al Sistema</div>
+
+    <div class="field">
+      <label>Correo Electrónico</label>
+      <input type="email" id="login-email" placeholder="usuario@pkspaseguridad.cl"
+             onkeydown="if(event.key==='Enter') doLogin()">
+    </div>
+
+    <div class="field">
+      <label>Contraseña</label>
+      <input type="password" id="login-pass" placeholder="••••••••"
+             onkeydown="if(event.key==='Enter') doLogin()">
+    </div>
+
+    <button class="btn-login" id="btn-login" onclick="doLogin()">
+      Ingresar al Sistema
+    </button>
+
+    <div class="login-error" id="login-error">
+      Email o contraseña incorrectos. Verifique sus credenciales.
+    </div>
+
+    <div class="login-loading" id="login-loading">
+      <div class="spin"></div>
+      Verificando credenciales...
+    </div>
+
+    <div class="security-badge">Acceso restringido</div>
+
+    <div class="perfiles">
+      <div class="perfil-badge"><div class="perfil-dot rrhh"></div>Recursos Humanos</div>
+      <div class="perfil-badge"><div class="perfil-dot prev"></div>Prevención de Riesgos</div>
+      <div class="perfil-badge"><div class="perfil-dot oper"></div>Ger. Operaciones</div>
+      <div class="perfil-badge"><div class="perfil-dot gg"></div>Gerencia General</div>
+    </div>
+  </div>
+
+  <div class="version-tag">PK SpA RRHH v1.0 — Sistema interno de uso exclusivo</div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+// CONFIGURACIÓN — misma URL del Apps Script
+// ══════════════════════════════════════════════
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbzr1LbD5OeV0lEn8jxafJUb1jjSxWyVL9pHMiJDA6NxoybaWLkloG_rxOKLrUBKOpyn/exec';
+
+// Perfiles y redirecciones
+const PERFILES = {
+  'RRHH':                  'pk_rrhh.html',
+  'Prevención de Riesgos': 'pk_prevencion.html',
+  'Gerencia Operaciones':  'pk_gerencia.html',
+  'Gerencia General':      'pk_gerencia.html',
+  'Supervisor':            'pk_supervisor.html',
+};
+
+async function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pass  = document.getElementById('login-pass').value.trim();
+  const errEl = document.getElementById('login-error');
+  const loadEl = document.getElementById('login-loading');
+  const btnEl = document.getElementById('btn-login');
+
+  errEl.classList.remove('show');
+
+  if (!email || !pass) {
+    errEl.textContent = 'Ingrese su email y contraseña.';
+    errEl.classList.add('show');
+    return;
+  }
+
+  btnEl.disabled = true;
+  loadEl.classList.add('show');
+
+  try {
+    // Llamar al Apps Script para verificar credenciales
+    const url = `${GAS_URL}?action=login&email=${encodeURIComponent(email)}&pass=${encodeURIComponent(pass)}`;
+    const resp = await fetch(url);
+    const data = await resp.json();
+
+    if (data.success) {
+      // Guardar sesión en sessionStorage
+      sessionStorage.setItem('pk_user', JSON.stringify({
+        email: data.email,
+        nombre: data.nombre,
+        perfil: data.perfil,
+        loginAt: new Date().toISOString()
+      }));
+      // Redirigir según perfil
+      const destino = PERFILES[data.perfil] || 'pk_rrhh.html';
+      window.location.href = destino;
+    } else {
+      errEl.textContent = data.message || 'Email o contraseña incorrectos.';
+      errEl.classList.add('show');
+      document.getElementById('login-pass').classList.add('error');
+    }
+  } catch(e) {
+    // MODO DEMO — login local para desarrollo
+    const demo = {
+      'jeniferbeatrizs@gmail.com': { pass: 'rrhh2025',   nombre: 'Jenifer Salas',    perfil: 'RRHH' },
+      'yalaska703@gmail.com':      { pass: 'oper2025',   nombre: 'Yalaska Farías',   perfil: 'Gerencia Operaciones' },
+      'rpkutz@gmail.com':          { pass: 'gg2025',     nombre: 'Rodolfo Pacheco',  perfil: 'Gerencia General' },
+      'prev@pkspaseguridad.cl':    { pass: 'prev2025',   nombre: 'Prevención PK',    perfil: 'Prevención de Riesgos' },
+      'supervisor@pkspaseguridad.cl': { pass: 'sup2025', nombre: 'Supervisor PK', perfil: 'Supervisor' },
+    };
+    const u = demo[email];
+    if (u && u.pass === pass) {
+      sessionStorage.setItem('pk_user', JSON.stringify({
+        email, nombre: u.nombre, perfil: u.perfil, loginAt: new Date().toISOString()
+      }));
+      window.location.href = PERFILES[u.perfil];
+    } else {
+      errEl.textContent = 'Email o contraseña incorrectos.';
+      errEl.classList.add('show');
+      document.getElementById('login-pass').classList.add('error');
+    }
+  } finally {
+    btnEl.disabled = false;
+    loadEl.classList.remove('show');
+  }
+}
+</script>
+</body>
+</html>
