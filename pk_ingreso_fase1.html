@@ -1646,7 +1646,7 @@
 // ══════════════════════════════════════════════
 // CONFIGURACIÓN — Reemplazar con URL de Apps Script
 // ══════════════════════════════════════════════
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbzr1LbD5OeV0lEn8jxafJUb1jjSxWyVL9pHMiJDA6NxoybaWLkloG_rxOKLrUBKOpyn/exec';
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbwDWzNMUCMsXQ25olCjutbe7wBgOCxDCyztRKTK3KWZPpImTlPY9CKDEwXNnjURLH24/exec';
 // Emails de notificación
 const EMAIL_RRHH    = 'rrhh@pkspaseguridad.cl';
 const EMAIL_GEROPER = 'operaciones@pkspaseguridad.cl';
@@ -2074,7 +2074,7 @@ async function submitForm() {
 
   try {
     // Si GAS_URL está configurado, enviar
-    if (GAS_URL !== 'https://script.google.com/macros/s/AKfycbzr1LbD5OeV0lEn8jxafJUb1jjSxWyVL9pHMiJDA6NxoybaWLkloG_rxOKLrUBKOpyn/exec') {
+    if (GAS_URL !== 'https://script.google.com/macros/s/AKfycbwDWzNMUCMsXQ25olCjutbe7wBgOCxDCyztRKTK3KWZPpImTlPY9CKDEwXNnjURLH24/exec') {
       await fetch(GAS_URL, {
         method: 'POST',
         body: JSON.stringify(formData),
