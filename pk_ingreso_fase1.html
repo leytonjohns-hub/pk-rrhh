@@ -2073,18 +2073,12 @@ async function submitForm() {
   };
 
   try {
-    // Si GAS_URL está configurado, enviar
-    if (GAS_URL !== 'https://script.google.com/macros/s/AKfycbwRUaaeH4itMup4oLzroamtVP6Syi_veTIqmSdSg05iBuB7U6i9U9ReNJXFIiygbrxL/exec') {
-      await fetch(GAS_URL, {
-        method: 'POST',
-        body: JSON.stringify(formData),
-        headers: { 'Content-Type': 'application/json' }
-      });
-    } else {
-      // Demo mode: simular delay
-      await new Promise(r => setTimeout(r, 3500));
-      console.log('DEMO MODE — Datos del formulario:', formData);
-    }
+    // Enviar al Apps Script
+    await fetch(GAS_URL, {
+      method: 'POST',
+      body: JSON.stringify(formData),
+      headers: { 'Content-Type': 'application/json' }
+    });
 
     clearInterval(interval);
     modal.classList.remove('show');
