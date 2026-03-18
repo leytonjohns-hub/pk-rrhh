@@ -561,7 +561,7 @@
 // ════════════════════════════════════════════════
 // CONFIG
 // ════════════════════════════════════════════════
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbwDWzNMUCMsXQ25olCjutbe7wBgOCxDCyztRKTK3KWZPpImTlPY9CKDEwXNnjURLH24/exec';
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbwRUaaeH4itMup4oLzroamtVP6Syi_veTIqmSdSg05iBuB7U6i9U9ReNJXFIiygbrxL/exec';
 const UMBRAL_ACUMULACION = 3;
 
 // ── Estado global ─────────────────────────────
@@ -1020,7 +1020,7 @@ async function guardarLicencia() {
   };
 
   try {
-    if (GAS_URL !== 'https://script.google.com/macros/s/AKfycbwDWzNMUCMsXQ25olCjutbe7wBgOCxDCyztRKTK3KWZPpImTlPY9CKDEwXNnjURLH24/exec') {
+    if (GAS_URL !== 'https://script.google.com/macros/s/AKfycbwRUaaeH4itMup4oLzroamtVP6Syi_veTIqmSdSg05iBuB7U6i9U9ReNJXFIiygbrxL/exec') {
       await fetch(GAS_URL, { method:'POST', body: JSON.stringify(payload),
         headers:{'Content-Type':'application/json'} });
     } else {

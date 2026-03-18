@@ -441,7 +441,7 @@ function irAPantallaPrincipal() {
 // ════════════════════════════════════════════════════════
 // CONFIG
 // ════════════════════════════════════════════════════════
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbwDWzNMUCMsXQ25olCjutbe7wBgOCxDCyztRKTK3KWZPpImTlPY9CKDEwXNnjURLH24/exec';
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbwRUaaeH4itMup4oLzroamtVP6Syi_veTIqmSdSg05iBuB7U6i9U9ReNJXFIiygbrxL/exec';
 const PLANTILLA_URL = 'PK_SpA_Plantilla_Carga_Masiva.xlsx';
 
 // Campos obligatorios y sus índices en el Excel (columna 0-based)
@@ -674,7 +674,7 @@ async function confirmarCarga() {
     const payload = mapearFila(d.obj, d.rut);
     try {
       let resp;
-      if (GAS_URL !== 'https://script.google.com/macros/s/AKfycbwDWzNMUCMsXQ25olCjutbe7wBgOCxDCyztRKTK3KWZPpImTlPY9CKDEwXNnjURLH24/exec') {
+      if (GAS_URL !== 'https://script.google.com/macros/s/AKfycbwRUaaeH4itMup4oLzroamtVP6Syi_veTIqmSdSg05iBuB7U6i9U9ReNJXFIiygbrxL/exec') {
         const r = await fetch(GAS_URL, {
           method: 'POST',
           body: JSON.stringify({ action: 'nuevoIngreso', ...payload }),
@@ -873,7 +873,7 @@ async function subirDocumentos() {
       const b64 = await fileToBase64(f);
       const rut = f.name.match(/^(\d{7,8}-[\dkK])/i)[1];
 
-      if (GAS_URL !== 'https://script.google.com/macros/s/AKfycbwDWzNMUCMsXQ25olCjutbe7wBgOCxDCyztRKTK3KWZPpImTlPY9CKDEwXNnjURLH24/exec') {
+      if (GAS_URL !== 'https://script.google.com/macros/s/AKfycbwRUaaeH4itMup4oLzroamtVP6Syi_veTIqmSdSg05iBuB7U6i9U9ReNJXFIiygbrxL/exec') {
         await fetch(GAS_URL, {
           method: 'POST',
           body: JSON.stringify({
