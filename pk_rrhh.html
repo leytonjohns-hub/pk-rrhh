@@ -1102,8 +1102,12 @@ async function cargarDatos() {
     const data = await resp.json();
     allTrabajadores = data.trabajadores || [];
   } catch(e) {
-    // DEMO DATA
-    allTrabajadores = generarDemoData();
+    console.error('Error cargando trabajadores:', e);
+    allTrabajadores = [];
+    showToast('⚠ Error conectando al sistema. Reintentando...', 'error');
+    // Reintentar después de 3 segundos
+    setTimeout(() => cargarTrabajadores(), 3000);
+    return;
   }
   renderDashboard();
   renderTrabajadores(allTrabajadores);
@@ -1113,13 +1117,7 @@ async function cargarDatos() {
 }
 
 function generarDemoData() {
-  return [
-    { ref:'PK-20250317-123456', nombre:'Juan Carlos González Pérez', rut:'12.345.678-9', os10_cat:'OS-10 Categoría A — Guarda de Seguridad', afp:'AFP Capital', salud:'FONASA B', fecha:'2025-03-17', estado:'Pendiente revisión RRHH', email:'jgonzalez@gmail.com', carpeta:'', genero:'Masculino', fecha_nac:'1990-05-12', dias:2 },
-    { ref:'PK-20250315-234567', nombre:'María Isabel Rodríguez Soto', rut:'11.234.567-8', os10_cat:'OS-10 Categoría B — Vigilante Privado', afp:'AFP Habitat', salud:'ISAPRE', fecha:'2025-03-15', estado:'Revisado', email:'mrodriguez@gmail.com', carpeta:'', genero:'Femenino', fecha_nac:'1988-11-03', dias:4 },
-    { ref:'PK-20250310-345678', nombre:'Pedro Antonio Muñoz Lagos', rut:'10.345.678-7', os10_cat:'OS-10 Categoría A — Guarda de Seguridad', afp:'AFP Provida', salud:'FONASA C', fecha:'2025-03-10', estado:'Contratado', email:'pmunoz@gmail.com', carpeta:'', genero:'Masculino', fecha_nac:'1995-08-22', dias:0 },
-    { ref:'PK-20250308-456789', nombre:'Ana Luisa Vargas Mora', rut:'9.456.789-6', os10_cat:'OS-10 Categoría C — Supervisor de Seguridad', afp:'AFP Modelo', salud:'FONASA D', fecha:'2025-03-08', estado:'Pendiente revisión RRHH', email:'avargas@gmail.com', carpeta:'', genero:'Femenino', fecha_nac:'1985-02-14', dias:9 },
-    { ref:'PK-20250301-567890', nombre:'Carlos Eduardo Fuentes Díaz', rut:'8.567.890-5', os10_cat:'OS-10 Categoría A — Guarda de Seguridad', afp:'AFP Capital', salud:'FONASA B', fecha:'2025-03-01', estado:'Contratado', email:'cfuentes@gmail.com', carpeta:'', genero:'Masculino', fecha_nac:'1992-07-30', dias:0 },
-  ];
+  return [];
 }
 
 // ══════════════════════════════════════════════
