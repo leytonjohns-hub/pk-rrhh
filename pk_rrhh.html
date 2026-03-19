@@ -543,10 +543,14 @@
     <div class="nav-item" onclick="showPanel('reportes')">
       <span class="ni-icon">📈</span> Reportes
     </div>
-  </nav>
+  <div style="text-align:center;font-size:0.65rem;color:#3d4450;padding:8px 0;border-top:1px solid #21262d;margin-top:8px">Sistema desarrollado por<br><strong style="color:#555">Luis Leyton-Johns</strong></div>
+</nav>
   <div class="sidebar-footer">
     <a class="btn-logout" href="#" onclick="irAPantallaPrincipal()" style="display:block;text-align:center;text-decoration:none;margin-bottom:8px;border-color:var(--pk-gold);color:var(--pk-gold)">🏠 Pantalla Principal</a>
     <button class="btn-logout" onclick="logout()">⏻ Cerrar Sesión</button>
+    <div style="margin-top:12px;font-size:0.65rem;color:#3d4450;text-align:center;line-height:1.4;">
+      Sistema desarrollado por<br><span style="color:#c9a84c;">Luis Leyton-Johns</span>
+    </div>
   </div>
 </aside>
 
@@ -829,6 +833,7 @@
     <div class="modal-body" id="modal-ficha-body"></div>
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="closeModal('modal-ficha')">Cerrar</button>
+      <a id="btn-abrir-drive" href="#" target="_blank" rel="noopener noreferrer" class="btn btn-secondary" style="display:none;text-decoration:none">📁 Abrir Carpeta Drive</a>
       <button class="btn btn-primary" onclick="openModalContrato()">📋 Datos Contrato / EPP</button>
       <button class="btn btn-primary" onclick="openModalEstado()">Actualizar Estado</button>
     </div>
@@ -1102,24 +1107,14 @@ async function cargarDatos() {
     const data = await resp.json();
     allTrabajadores = data.trabajadores || [];
   } catch(e) {
-    // DEMO DATA
-    allTrabajadores = generarDemoData();
+    console.error('Error cargando trabajadores:', e);
+    allTrabajadores = [];
   }
   renderDashboard();
   renderTrabajadores(allTrabajadores);
   poblarSelectTrabajadores();
   renderAlertas();
   actualizarBadgeAlertas();
-}
-
-function generarDemoData() {
-  return [
-    { ref:'PK-20250317-123456', nombre:'Juan Carlos González Pérez', rut:'12.345.678-9', os10_cat:'OS-10 Categoría A — Guarda de Seguridad', afp:'AFP Capital', salud:'FONASA B', fecha:'2025-03-17', estado:'Pendiente revisión RRHH', email:'jgonzalez@gmail.com', carpeta:'', genero:'Masculino', fecha_nac:'1990-05-12', dias:2 },
-    { ref:'PK-20250315-234567', nombre:'María Isabel Rodríguez Soto', rut:'11.234.567-8', os10_cat:'OS-10 Categoría B — Vigilante Privado', afp:'AFP Habitat', salud:'ISAPRE', fecha:'2025-03-15', estado:'Revisado', email:'mrodriguez@gmail.com', carpeta:'', genero:'Femenino', fecha_nac:'1988-11-03', dias:4 },
-    { ref:'PK-20250310-345678', nombre:'Pedro Antonio Muñoz Lagos', rut:'10.345.678-7', os10_cat:'OS-10 Categoría A — Guarda de Seguridad', afp:'AFP Provida', salud:'FONASA C', fecha:'2025-03-10', estado:'Contratado', email:'pmunoz@gmail.com', carpeta:'', genero:'Masculino', fecha_nac:'1995-08-22', dias:0 },
-    { ref:'PK-20250308-456789', nombre:'Ana Luisa Vargas Mora', rut:'9.456.789-6', os10_cat:'OS-10 Categoría C — Supervisor de Seguridad', afp:'AFP Modelo', salud:'FONASA D', fecha:'2025-03-08', estado:'Pendiente revisión RRHH', email:'avargas@gmail.com', carpeta:'', genero:'Femenino', fecha_nac:'1985-02-14', dias:9 },
-    { ref:'PK-20250301-567890', nombre:'Carlos Eduardo Fuentes Díaz', rut:'8.567.890-5', os10_cat:'OS-10 Categoría A — Guarda de Seguridad', afp:'AFP Capital', salud:'FONASA B', fecha:'2025-03-01', estado:'Contratado', email:'cfuentes@gmail.com', carpeta:'', genero:'Masculino', fecha_nac:'1992-07-30', dias:0 },
-  ];
 }
 
 // ══════════════════════════════════════════════
@@ -1234,25 +1229,16 @@ function verFicha(ref) {
         ${fi('EPP Entregado', t.epp_entregado)}
       </div>
     </div>` : `<div style="margin-top:.75rem;font-size:.8rem;color:var(--pk-muted);padding:8px;background:rgba(217,83,79,.06);border-left:2px solid var(--pk-red)">⚠ Datos de contrato y EPP aún no completados — use el botón "Datos Contrato / EPP"</div>`}
-    ${t.carpeta ? `<div style="margin-top:1rem">
-      <button onclick="abrirCarpetaDrive()" class="btn btn-secondary">📁 Abrir Carpeta Drive</button>
-    </div>` : ''}
   `;
-  // Guardar URL carpeta para el botón
-  window._carpetaActual = t.carpeta || '';
-  openModal('modal-ficha');
-}
-
-function abrirCarpetaDrive() {
-  if (window._carpetaActual) {
-    const a = document.createElement('a');
-    a.href = window._carpetaActual;
-    a.target = '_blank';
-    a.rel = 'noopener noreferrer';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+  // Botón Drive en footer — link estático con href real
+  const btnDrive = document.getElementById('btn-abrir-drive');
+  if (t.carpeta) {
+    btnDrive.href = t.carpeta;
+    btnDrive.style.display = 'inline-flex';
+  } else {
+    btnDrive.style.display = 'none';
   }
+  openModal('modal-ficha');
 }
 
 function fi(label, val) {
