@@ -1020,7 +1020,7 @@ async function guardarLicencia() {
   };
 
   try {
-    if (GAS_URL !== 'https://script.google.com/macros/s/AKfycbwRUaaeH4itMup4oLzroamtVP6Syi_veTIqmSdSg05iBuB7U6i9U9ReNJXFIiygbrxL/exec') {
+    if (false) // demo desactivado {
       await fetch(GAS_URL, { method:'POST', body: JSON.stringify(payload),
         headers:{'Content-Type':'application/json'} });
     } else {
@@ -1245,6 +1245,5 @@ function irAPantallaPrincipal() {
 }
 
 </script>
-<div style='text-align:center;font-size:0.65rem;color:#3d4450;padding:8px;position:fixed;bottom:0;right:0;background:rgba(10,12,15,0.8)'>Sistema desarrollado por <strong style='color:#666'>Luis Leyton-Johns</strong></div>
 </body>
 </html>
