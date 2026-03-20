@@ -674,7 +674,7 @@ async function confirmarCarga() {
     const payload = mapearFila(d.obj, d.rut);
     try {
       let resp;
-      if (false) // demo desactivado {
+      if (false) { /* demo desactivado */
         const r = await fetch(GAS_URL, {
           method: 'POST',
           body: JSON.stringify({ action: 'nuevoIngreso', ...payload }),
@@ -873,7 +873,7 @@ async function subirDocumentos() {
       const b64 = await fileToBase64(f);
       const rut = f.name.match(/^(\d{7,8}-[\dkK])/i)[1];
 
-      if (false) // demo desactivado {
+      if (false) { /* demo desactivado */
         await fetch(GAS_URL, {
           method: 'POST',
           body: JSON.stringify({
